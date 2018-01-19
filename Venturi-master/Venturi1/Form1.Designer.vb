@@ -25,10 +25,10 @@ Partial Class Form1
         Dim ChartArea3 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
         Dim Legend3 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
         Dim Series3 As System.Windows.Forms.DataVisualization.Charting.Series = New System.Windows.Forms.DataVisualization.Charting.Series()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Dim ChartArea4 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
         Dim Legend4 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
         Dim Series4 As System.Windows.Forms.DataVisualization.Charting.Series = New System.Windows.Forms.DataVisualization.Charting.Series()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
         Me.Label40 = New System.Windows.Forms.Label()
@@ -39,6 +39,7 @@ Partial Class Form1
         Me.GroupBox5 = New System.Windows.Forms.GroupBox()
         Me.Chart1 = New System.Windows.Forms.DataVisualization.Charting.Chart()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.Label11 = New System.Windows.Forms.Label()
         Me.NumericUpDown5 = New System.Windows.Forms.NumericUpDown()
         Me.NumericUpDown1 = New System.Windows.Forms.NumericUpDown()
         Me.TextBox16 = New System.Windows.Forms.TextBox()
@@ -134,7 +135,6 @@ Partial Class Form1
         Me.Button5 = New System.Windows.Forms.Button()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
-        Me.Label11 = New System.Windows.Forms.Label()
         Me.TabPage6 = New System.Windows.Forms.TabPage()
         Me.PictureBox4 = New System.Windows.Forms.PictureBox()
         Me.TabControl1.SuspendLayout()
@@ -181,7 +181,7 @@ Partial Class Form1
         Me.TabControl1.Location = New System.Drawing.Point(0, 0)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(851, 716)
+        Me.TabControl1.Size = New System.Drawing.Size(842, 718)
         Me.TabControl1.TabIndex = 0
         '
         'TabPage1
@@ -199,7 +199,7 @@ Partial Class Form1
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(843, 690)
+        Me.TabPage1.Size = New System.Drawing.Size(834, 692)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Process data"
         Me.TabPage1.UseVisualStyleBackColor = True
@@ -293,6 +293,15 @@ Partial Class Form1
         Me.GroupBox4.TabIndex = 8
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Iteratie "
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(14, 138)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(217, 13)
+        Me.Label11.TabIndex = 27
+        Me.Label11.Text = "Choose β  0.6 - 0.75 (Shell Drwg S24.002-G)"
         '
         'NumericUpDown5
         '
@@ -687,8 +696,8 @@ Partial Class Form1
         Me.NumericUpDown8.DecimalPlaces = 1
         Me.NumericUpDown8.Increment = New Decimal(New Integer() {1, 0, 0, 65536})
         Me.NumericUpDown8.Location = New System.Drawing.Point(268, 147)
-        Me.NumericUpDown8.Maximum = New Decimal(New Integer() {40, 0, 0, 0})
-        Me.NumericUpDown8.Minimum = New Decimal(New Integer() {5, 0, 0, 65536})
+        Me.NumericUpDown8.Maximum = New Decimal(New Integer() {30, 0, 0, 0})
+        Me.NumericUpDown8.Minimum = New Decimal(New Integer() {10, 0, 0, 0})
         Me.NumericUpDown8.Name = "NumericUpDown8"
         Me.NumericUpDown8.Size = New System.Drawing.Size(70, 20)
         Me.NumericUpDown8.TabIndex = 11
@@ -1320,15 +1329,6 @@ Partial Class Form1
         Me.PictureBox2.TabIndex = 0
         Me.PictureBox2.TabStop = False
         '
-        'Label11
-        '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(14, 138)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(217, 13)
-        Me.Label11.TabIndex = 27
-        Me.Label11.Text = "Choose β  0.6 - 0.75 (Shell Drwg S24.002-G)"
-        '
         'TabPage6
         '
         Me.TabPage6.Controls.Add(Me.PictureBox4)
@@ -1355,7 +1355,7 @@ Partial Class Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(851, 716)
+        Me.ClientSize = New System.Drawing.Size(842, 718)
         Me.Controls.Add(Me.TabControl1)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.IsMdiContainer = True

@@ -24,8 +24,8 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         TextBox21.Text =
-       "ISO5167-1:2003" & vbCrLf &
-       "ISO5167-4:2003" & vbCrLf &
+       "ISO 5167-1:2003" & vbCrLf &
+       "ISO 5167-4:2003" & vbCrLf &
        "Classieke Venturi diameter 200-1200mm"
 
         '------------- Initial values----------------------
