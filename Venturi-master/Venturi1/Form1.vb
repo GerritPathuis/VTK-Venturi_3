@@ -61,9 +61,9 @@ Public Class Form1
         Ecc2 = 1.0      'Start upper limit of eccentricity [-]
         Ecc3 = 0.5      'In the middle of eccentricity [-]
 
-        Dev1 = calc_A2(Ecc1)
-        Dev2 = calc_A2(Ecc2)
-        Dev3 = calc_A2(Ecc3)
+        Dev1 = CDbl(Calc_A2(Ecc1))
+        Dev2 = CDbl(Calc_A2(Ecc2))
+        Dev3 = CDbl(Calc_A2(Ecc3))
 
         '-------------Iteratie 30x halveren moet voldoende zijn ---------------
         '---------- Exc= excentricity, looking for Deviation is zero ---------
@@ -75,9 +75,9 @@ Public Class Form1
                 Ecc1 = Ecc3
             End If
             Ecc3 = (Ecc1 + Ecc2) / 2
-            Dev1 = calc_A2(Ecc1)
-            Dev2 = calc_A2(Ecc2)
-            Dev3 = calc_A2(Ecc3)
+            Dev1 = CDbl(Calc_A2(Ecc1))
+            Dev2 = CDbl(Calc_A2(Ecc2))
+            Dev3 = CDbl(Calc_A2(Ecc3))
         Next jjr
         beta = Ecc3
         dia_keel = beta * dia_in
@@ -101,7 +101,7 @@ Public Class Form1
         present_results()
     End Sub
 
-    Private Function Calc_A2(betaa As Double)
+    Private Function Calc_A2(betaa As Double) As Double
 
         '----- calc -------------
         p2_tap = p1_tap - dp_tap
@@ -138,14 +138,14 @@ Public Class Form1
     End Function
     Private Sub Present_results()
         Try
-            NumericUpDown1.Value = flow_kghr            '[kg/m3]
-            NumericUpDown7.Value = kappa                'Isentropic exponent
-            NumericUpDown2.Value = density              '[kg/m3]
-            NumericUpDown6.Value = dyn_visco * 10 ^ 6   'dyn_visco
-            NumericUpDown11.Value = p1_tap / 100        '[mBar]->[pa]
-            NumericUpDown8.Value = dp_tap / 100         '[mBar]->[pa]
-            NumericUpDown4.Value = dia_in * 1000        '[m] classis venturi inlet diameter = outlet diameter
-            NumericUpDown5.Value = beta                 '[-]
+            NumericUpDown1.Value = CDec(flow_kghr)            '[kg/m3]
+            NumericUpDown7.Value = CDec(kappa)                'Isentropic exponent
+            NumericUpDown2.Value = CDec(density)              '[kg/m3]
+            NumericUpDown6.Value = CDec(dyn_visco * 10 ^ 6)   'dyn_visco
+            NumericUpDown11.Value = CDec(p1_tap / 100)        '[mBar]->[pa]
+            NumericUpDown8.Value = CDec(dp_tap / 100)         '[mBar]->[pa]
+            NumericUpDown4.Value = CDec(dia_in * 1000)        '[m] classis venturi inlet diameter = outlet diameter
+            NumericUpDown5.Value = CDec(beta)                 '[-]
 
             TextBox1.Text = Math.Round(dia_keel * 1000, 0).ToString     '[mm] keel diameter
             TextBox2.Text = C_classic.ToString
@@ -211,7 +211,7 @@ Public Class Form1
 
             '------ data for the Chart -----------------------------
             For x = 0 To 1.0 Step 0.01
-                y = Calc_A2(x)
+                y = CDbl(Calc_A2(x))
                 Chart1.Series(0).Points.AddXY(x, y)
             Next x
 
@@ -284,7 +284,7 @@ Public Class Form1
 
             'Start Word and open the document template. 
             font_sizze = 9
-            oWord = CreateObject("Word.Application")
+            oWord = CType(CreateObject("Word.Application"), Word.Application)
             oWord.Visible = True
             oDoc = oWord.Documents.Add
 
@@ -293,14 +293,14 @@ Public Class Form1
             oPara1.Range.Text = "VTK Engineering"
             oPara1.Range.Font.Name = "Arial"
             oPara1.Range.Font.Size = font_sizze + 3
-            oPara1.Range.Font.Bold = True
+            oPara1.Range.Font.Bold = CInt(True)
             oPara1.Format.SpaceAfter = 1                '24 pt spacing after paragraph. 
             oPara1.Range.InsertParagraphAfter()
 
             oPara2 = oDoc.Content.Paragraphs.Add(oDoc.Bookmarks.Item("\endofdoc").Range)
             oPara2.Range.Font.Size = font_sizze + 1
             oPara2.Format.SpaceAfter = 1
-            oPara2.Range.Font.Bold = False
+            oPara2.Range.Font.Bold = CInt(False)
             oPara2.Range.Text = "Classical Venturi tube acc ISO5167-1-4:2003" & vbCrLf
             oPara2.Range.InsertParagraphAfter()
 
@@ -309,8 +309,8 @@ Public Class Form1
             oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 4, 2)
             oTable.Range.ParagraphFormat.SpaceAfter = 1
             oTable.Range.Font.Size = font_sizze
-            oTable.Range.Font.Bold = False
-            oTable.Rows.Item(1).Range.Font.Bold = True
+            oTable.Range.Font.Bold = CInt(False)
+            oTable.Rows.Item(1).Range.Font.Bold = CInt(True)
             row = 1
             oTable.Cell(row, 1).Range.Text = "Project Name"
             oTable.Cell(row, 2).Range.Text = TextBox24.Text
@@ -327,7 +327,7 @@ Public Class Form1
             oTable.Columns(1).Width = oWord.InchesToPoints(2.5)   'Change width of columns 1 & 2.
             oTable.Columns(2).Width = oWord.InchesToPoints(2)
 
-            oTable.Rows.Item(1).Range.Font.Bold = True
+            oTable.Rows.Item(1).Range.Font.Bold = CInt(True)
             oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
 
             '----------------------------------------------
@@ -335,8 +335,8 @@ Public Class Form1
             oTable = oDoc.Tables.Add(oDoc.Bookmarks.Item("\endofdoc").Range, 23, 3)
             oTable.Range.ParagraphFormat.SpaceAfter = 1
             oTable.Range.Font.Size = font_sizze
-            oTable.Range.Font.Bold = False
-            oTable.Rows.Item(1).Range.Font.Bold = True
+            oTable.Range.Font.Bold = CInt(False)
+            oTable.Rows.Item(1).Range.Font.Bold = CInt(True)
             oTable.Rows.Item(1).Range.Font.Size = font_sizze + 2
             row = 1
             oTable.Cell(row, 1).Range.Text = "Input Data"
@@ -436,7 +436,7 @@ Public Class Form1
             oPara4 = oDoc.Content.Paragraphs.Add
             oPara4.Alignment = Word.WdParagraphAlignment.wdAlignParagraphLeft
             oPara4.Range.InlineShapes.AddPicture("c:\Temp\MainChart.gif")
-            oPara4.Range.InlineShapes.Item(1).LockAspectRatio = True
+            oPara4.Range.InlineShapes.Item(1).LockAspectRatio = CType(True, Microsoft.Office.Core.MsoTriState)
             oPara4.Range.InlineShapes.Item(1).Width = 310
             oDoc.Bookmarks.Item("\endofdoc").Range.InsertParagraphAfter()
 
@@ -446,7 +446,7 @@ Public Class Form1
 
             If Directory.Exists("N:\Engineering\VBasic\Rapport_copy") Then
                 'GroupBox12.Text = "File saved at " & ufilename
-                oWord.ActiveDocument.SaveAs(ufilename)
+                '  oWord.ActiveDocument.SaveAs(ufilename)
             End If
         Catch ex As Exception
             MessageBox.Show("Bestaat directory N:\Engineering\VBasic\Rapport_copy\ ? " & ex.Message)  ' Show the exception's message.
