@@ -13,15 +13,6 @@ Public Class Form1
     Dim exp_factor, exp_factor1, exp_factor2, exp_factor3 As Double
     Dim A2a, A2b, a2c As Double
 
-    Private Sub RadioButton1_CheckedChanged(sender As Object, e As EventArgs) Handles RadioButton1.CheckedChanged
-        If RadioButton1.Checked Then
-            NumericUpDown15.Value = NumericUpDown13.Value
-        Else
-            NumericUpDown15.Value = NumericUpDown14.Value
-        End If
-        Calc_rectangle_venturi()
-    End Sub
-
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown15.ValueChanged, NumericUpDown14.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, NumericUpDown19.ValueChanged, NumericUpDown17.ValueChanged, NumericUpDown16.ValueChanged, TabPage7.Enter
         Calc_rectangle_venturi()
     End Sub
@@ -29,6 +20,8 @@ Public Class Form1
 
     Private Sub Calc_rectangle_venturi()
         Dim Inlet_W, Inlet_H, small_w, small_h As Double    'Dimensions
+        Dim Inlet_sq As Double      'W/H ratio
+        Dim Throught_sq As Double   'W/H ratio
         Dim m As Double
         Dim β As Double
         Dim De As Double            'Diameter Entrance
@@ -50,13 +43,16 @@ Public Class Form1
 
         Dim area_inlet As Double    'Inlet
         Dim area_throut As Double   'Throut
+        Dim v_inlet As Double       'Inlet speed
 
-        vis = NumericUpDown6.Value / 1000      'Viscositie [m.Pa.s]
+        vis = NumericUpDown6.Value / 1000       'Viscositie [m.Pa.s]
         Inlet_W = NumericUpDown12.Value         'Inlet width [mm]
         Inlet_H = NumericUpDown13.Value         'Inlet height [mm]
+        Inlet_sq = Inlet_W / Inlet_H            'w/h ratio
         area_inlet = Inlet_W * Inlet_H
         small_w = NumericUpDown14.Value         'Keel width [mm]
         small_h = NumericUpDown15.Value         'Keel height [mm]
+        Throught_sq = small_w / small_h         'w/h ratio
         area_throut = small_w * small_h
 
 
@@ -96,11 +92,29 @@ Public Class Form1
         '=========== Reynolds ============
         Reynolds = 1.2732 * 10 ^ 6 * qm / (vis * De)
 
-        '============Check==============
-        If (Inlet_W / Inlet_H) < 0.67 Or (Inlet_W / Inlet_H) > 1.5 Then
-            TextBox29.Text = "Inlet_W / Inlet_H) < 0.67"
+        '========= inlet speed =============
+        v_inlet = qm * _ρ / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
+
+
+        '============ Check inlet dimensions ratio =============
+        If Inlet_sq < 0.67 Or Inlet_sq > 1.5 Then
+            TextBox44.BackColor = Color.Red
         Else
-            TextBox29.Text = " "
+            TextBox44.BackColor = Color.LightGreen
+        End If
+
+        '============ Check throught dimensions ratio =============
+        If Throught_sq < 0.67 Or Throught_sq > 1.5 Then
+            TextBox45.BackColor = Color.Red
+        Else
+            TextBox45.BackColor = Color.LightGreen
+        End If
+
+        '============ Check Reynold =============
+        If Reynolds < 2.0 * 10 ^ 5 Or Reynolds > 2.0 * 10 ^ 7 Then
+            TextBox41.BackColor = Color.Red
+        Else
+            TextBox41.BackColor = Color.LightGreen
         End If
 
         TextBox14.Text = area_inlet.ToString("0")
@@ -109,14 +123,18 @@ Public Class Form1
         TextBox40.Text = ε.ToString("0.0000")
         TextBox31.Text = De.ToString("0")
         TextBox32.Text = _ρ.ToString("0.0000")
-        TextBox33.Text = qm.ToString("0")
-        TextBox34.Text = dp.ToString("0.000")   '[bar]
-        TextBox35.Text = ip.ToString("0.000")    '[bar]
+        TextBox33.Text = qm.ToString("0.0")         '[kg/s]
+        TextBox34.Text = dp.ToString("0.000")       '[bar]
+        TextBox35.Text = ip.ToString("0.000")       '[bar]
         TextBox36.Text = vis.ToString("0.0000")
         TextBox37.Text = area_throut.ToString("0")
         TextBox38.Text = α_venturi.ToString
         TextBox39.Text = κ.ToString
-        TextBox33.Text = qm.ToString("0")
+        TextBox41.Text = Reynolds.ToString("0")
+        TextBox42.Text = (qm * 3600).ToString("0")  '[kg/hr]
+        TextBox43.Text = v_inlet.ToString("0.0")    '[m3/s]
+        TextBox44.Text = Inlet_sq.ToString("0.0")    '[-]
+        TextBox45.Text = Throught_sq.ToString("0.0")    '[-]
     End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click, NumericUpDown10.ValueChanged, TabPage5.Enter
