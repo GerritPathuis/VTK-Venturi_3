@@ -3,13 +3,17 @@ Imports System.Math
 Imports Word = Microsoft.Office.Interop.Word
 
 Public Class Form1
-    Dim flow_kghr, flow_kgs, flow_m3sec As Double
-    Dim dia_in, dia_keel, beta As Double           'Dimensions
-    Dim dyn_visco, _ρ As Double                    'Medium info
-    Dim C_classic, Reynolds, area_in, speed_inlet As Double   'Venturi data
-    Dim _p1_tap, _p2_tap, _dp_tap As Double        'Pressures [Pa]
-    Dim kappa, tou As Double
-    Dim ξ_pr_loss, zeta As Double
+    Dim _flow_kghr, _flow_kgs, _flow_m3sec As Double
+    Dim _dia_in, _dia_keel As Double        'Dimensions
+    Dim _β As Double                        'Diameter ratio 
+    Dim _dyn_visco, _ρ As Double            'Medium info
+    Dim _C_classic As Double                'Discharge coefficient
+    Dim _Reynolds As Double                 'Reynolds
+    Dim _area_in, _v_inlet As Double        'Venturi data
+    Dim _p1_tap, _p2_tap, _dp_tap As Double 'Pressures [Pa]
+    Dim _κa, _τ As Double                   'Kappa, tou
+    Dim ξ_pr_loss As Double                 'Unrecovered pressure loss
+    Dim zeta As Double                      'Resistance coeffi 
     Dim exp_factor, exp_factor1, exp_factor2, exp_factor3 As Double
     Dim A2a, A2b, a2c As Double
 
@@ -24,7 +28,8 @@ Public Class Form1
         Dim Throught_sq As Double   'W/H ratio
         Dim m As Double
         Dim β As Double
-        Dim De As Double            'Diameter Entrance
+        Dim DeIn As Double          'Diameter inlet
+        Dim DeT As Double           'Diameter throught
         Dim α_venturi As Double     'Expansion coefficient
         Dim T_line As Double        'Line temperature (actual)
         Dim T_0 As Double           'Reference temperature
@@ -34,14 +39,14 @@ Public Class Form1
         Dim dp As Double            'Instrument dp
         Dim κ As Double = 1.4       'κ= Cp/Cv
         Dim Ka As Double            'ka factor
-        Dim C As Double = 0.975     'factor
+        Dim Cv As Double = 0.975     'factor rectangle venturi
         Dim ε As Double             'fluids expansivity
         Dim vis As Double           'Viscosity
         Dim Fs As Double
         Dim Reynolds As Double
         Dim W As Double = 0         ' Steam_water_ontent[%]
 
-        Dim area_inlet As Double    'Inlet
+        Dim _area_inlet As Double    'Inlet
         Dim area_throut As Double   'Throut
         Dim v_inlet As Double       'Inlet speed
 
@@ -49,7 +54,7 @@ Public Class Form1
         Inlet_W = NumericUpDown12.Value         'Inlet width [mm]
         Inlet_H = NumericUpDown13.Value         'Inlet height [mm]
         Inlet_sq = Inlet_W / Inlet_H            'w/h ratio
-        area_inlet = Inlet_W * Inlet_H
+        _area_inlet = Inlet_W * Inlet_H
         small_w = NumericUpDown14.Value         'Keel width [mm]
         small_h = NumericUpDown15.Value         'Keel height [mm]
         Throught_sq = small_w / small_h         'w/h ratio
@@ -63,13 +68,17 @@ Public Class Form1
         qm = NumericUpDown1.Value           'Flow [kg/hr]
         X = NumericUpDown19.Value           'Normal flow scale 0-10
 
-        'Thermal expansion coefficient air at 0°C and 1 bara:  0.00369 1/K  
-        α_venturi = 0.00369
+        'Thermal expansion coefficient steel 
+        α_venturi = 1.3 * 10 ^ -5           '[/K]
 
         m = (small_w * small_h) / (Inlet_W * Inlet_H)
 
+        '============= Calc inlet diameter ============
+        DeIn = 1.1284 * Sqrt(Inlet_W * Inlet_H) * (1 + α_venturi * (T_line - T_0))
+
         '============= Calc throat diameter ============
-        De = 1.1284 * Sqrt(Inlet_W * Inlet_H) * (1 + α_venturi * (T_line - T_0))
+        DeT = 1.1284 * Sqrt(small_w * small_h) * (1 + α_venturi * (T_line - T_0))
+
 
         '=============   venturi dimensional β ratio  ============
         β = Sqrt(small_w * small_h / (Inlet_H * Inlet_W))
@@ -85,12 +94,12 @@ Public Class Form1
         ε *= (1 - Ka ^ ((κ - 1) / κ)) / (1 - Ka)
         ε = Sqrt(ε)
 
-        '============ Mass flow ==============
-        qm = 3.512407 * 10 ^ -5 * C * (1 / Sqrt(1 - β ^ 4))
-        qm *= ε * X * De ^ 2 * Fs * Sqrt(dp * _ρ)
+        '============ Mass flow [kg/s] ==============
+        qm = 3.512407 * 10 ^ -5 * Cv * (1 / Sqrt(1 - β ^ 4))
+        qm *= ε * X * DeT ^ 2 * Fs * Sqrt(dp * _ρ)
 
-        '=========== Reynolds ============
-        Reynolds = 1.2732 * 10 ^ 6 * qm / (vis * De)
+        '=========== _Reynolds ============
+        Reynolds = 1.2732 * 10 ^ 6 * qm / (vis * DeIn)
 
         '========= inlet speed =============
         v_inlet = qm * _ρ / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
@@ -111,30 +120,38 @@ Public Class Form1
         End If
 
         '============ Check Reynold =============
-        If Reynolds < 2.0 * 10 ^ 5 Or Reynolds > 2.0 * 10 ^ 7 Then
+        If _Reynolds < 2.0 * 10 ^ 5 Or _Reynolds > 2.0 * 10 ^ 7 Then
             TextBox41.BackColor = Color.Red
         Else
             TextBox41.BackColor = Color.LightGreen
         End If
 
-        TextBox14.Text = area_inlet.ToString("0")
+        TextBox31.BackColor = CType(IIf(DeIn <= 1200, Color.LightGreen, Color.Red), Color)
+
+        TextBox14.Text = _area_inlet.ToString("0")
         TextBox28.Text = β.ToString("0.0000")
         TextBox30.Text = Ka.ToString("0.0000")
         TextBox40.Text = ε.ToString("0.0000")
-        TextBox31.Text = De.ToString("0")
-        TextBox32.Text = _ρ.ToString("0.0000")
-        TextBox33.Text = qm.ToString("0.0")         '[kg/s]
-        TextBox34.Text = dp.ToString("0.000")       '[bar]
-        TextBox35.Text = ip.ToString("0.000")       '[bar]
-        TextBox36.Text = vis.ToString("0.0000")
+        TextBox31.Text = DeIn.ToString("0")             'Inlet size temp comp.
+        TextBox47.Text = DeT.ToString("0")              'Throut size temp comp.
+        TextBox32.Text = _ρ.ToString("0.0000")          'Density
+
+        TextBox33.Text = qm.ToString("0.00")            '[kg/s]
+        TextBox42.Text = (qm * 3600).ToString("0")      '[kg/hr]
+        TextBox50.Text = (qm * _ρ).ToString("0.00")     '[m3/s]
+        TextBox49.Text = (qm * 3600 * _ρ).ToString("0") '[m3/hr]
+
+        TextBox34.Text = dp.ToString("0.000")           '[bar]
+        TextBox35.Text = ip.ToString("0.000")           '[bar]
+        TextBox36.Text = vis.ToString("0.0000")         'Voscosity
         TextBox37.Text = area_throut.ToString("0")
         TextBox38.Text = α_venturi.ToString
         TextBox39.Text = κ.ToString
-        TextBox41.Text = Reynolds.ToString("0")
-        TextBox42.Text = (qm * 3600).ToString("0")  '[kg/hr]
+        TextBox41.Text = _Reynolds.ToString("0")
+
         TextBox43.Text = v_inlet.ToString("0.0")    '[m3/s]
-        TextBox44.Text = Inlet_sq.ToString("0.0")    '[-]
-        TextBox45.Text = Throught_sq.ToString("0.0")    '[-]
+        TextBox44.Text = Inlet_sq.ToString("0.0")   '[-]
+        TextBox45.Text = Throught_sq.ToString("0.0") '[-]
     End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click, NumericUpDown10.ValueChanged, TabPage5.Enter
@@ -148,18 +165,19 @@ Public Class Form1
        "Classieke Venturi diameter 200-1200mm"
 
         '------------- Initial values----------------------
-        flow_kghr = 30000           '[kg/m3]
-        flow_kgs = flow_kghr / 3600 '[kg/sec]
-        _ρ = 1.2                    '[kg/m3]
-        kappa = 1.4                 'Isentropic exponent
-        _p1_tap = 101325            '[pa]
+        _flow_kghr = 30000           '[kg/m3]
+        _flow_kgs = _flow_kghr / 3600 '[kg/sec]
+        _ρ = 1.2                     '[kg/m3]
+        _κa = 1.4                 'Isentropic exponent
+        _p1_tap = 101325             '[pa]
 
-        dia_in = 0.8                '[m] classis venturi inlet diameter = outlet diameter
-        beta = 0.5                  '[-]
-        C_classic = 0.985           'See ISO5167-4 section 5.5.4
+        _dia_in = 0.8                '[m] classis venturi inlet diameter = outlet diameter
+        _β = 0.5                     '[-]
+        _C_classic = 0.985           'See ISO5167-4 section 5.5.4
 
         '========== dp range instrument [mbar] =============
         ComboBox1.Items.Add("    12.5")
+        ComboBox1.Items.Add("    20")
         ComboBox1.Items.Add("    25")
         ComboBox1.Items.Add("    50")
         ComboBox1.Items.Add("   125")
@@ -170,18 +188,18 @@ Public Class Form1
         _dp_tap *= 100                          '[mbar] --> [Pa]
 
         '--------- calc ---------------
-        flow_m3sec = flow_kghr / (3600 * _ρ)    '[m3/s]
-        area_in = Math.PI / 4 * dia_in ^ 2      '[m2]
-        speed_inlet = flow_m3sec / area_in      '[m/s] keel
+        _flow_m3sec = _flow_kghr / (3600 * _ρ)    '[m3/s]
+        _area_in = Math.PI / 4 * _dia_in ^ 2      '[m2]
+        _v_inlet = _flow_m3sec / _area_in      '[m/s] keel
         _p2_tap = _p1_tap - _dp_tap             '[Pa]
-        tou = _p2_tap / _p1_tap                 'Pressure ratio
-        dia_keel = beta * dia_in                '[mm]
+        _τ = _p2_tap / _p1_tap                 'Pressure ratio
+        _dia_keel = _β * _dia_in                '[mm]
 
         '----------- terug zetten op het scherm-------------
         Present_results()
         Calc_venturi1()
     End Sub
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click, NumericUpDown2.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown7.ValueChanged, NumericUpDown6.ValueChanged, NumericUpDown1.ValueChanged, NumericUpDown4.ValueChanged, NumericUpDown5.ValueChanged, ComboBox1.SelectedIndexChanged
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click, NumericUpDown2.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown7.ValueChanged, NumericUpDown6.ValueChanged, NumericUpDown1.ValueChanged, NumericUpDown4.ValueChanged, ComboBox1.SelectedIndexChanged
         Calc_venturi1()
     End Sub
 
@@ -213,8 +231,8 @@ Public Class Form1
             Dev2 = CDbl(Calc_A2(Ecc2))
             Dev3 = CDbl(Calc_A2(Ecc3))
         Next jjr
-        beta = Ecc3
-        dia_keel = beta * dia_in
+        _β = Ecc3
+        _dia_keel = _β * _dia_in
 
         '-------- Controle nulpunt zoek functie ----------------
         If Dev3 > 0.00001 Then
@@ -225,94 +243,95 @@ Public Class Form1
 
         '-------- Unrecovered pressure loss over the complete venturi assembly----
         'ξ_pr_loss = 0.15 * _dp_tap
-        ξ_pr_loss = (-0.017 * beta + 0.191) * _dp_tap   'For 7 degree divergent section
+        ξ_pr_loss = (-0.017 * _β + 0.191) * _dp_tap   'For 7 degree divergent section
 
         '--------- resistance coefficient venturi assembly 
-        zeta = 2 * ξ_pr_loss / (_ρ * speed_inlet ^ 2)
+        zeta = 2 * ξ_pr_loss / (_ρ * _v_inlet ^ 2)
 
         Draw_chart1()
         Present_results()
     End Sub
 
-    Private Function Calc_A2(betaa As Double) As Double
+    Private Function Calc_A2(_βa As Double) As Double
 
         '----- calc -------------
         _p2_tap = _p1_tap - _dp_tap                 '[Pa]
-        tou = _p2_tap / _p1_tap                     'Pressure ratio
+        _τ = _p2_tap / _p1_tap                     'Pressure ratio
 
         '---------- expansie factor ISI 5167-4 Equation 2---------
-        exp_factor1 = kappa * tou ^ (2 / kappa)
-        exp_factor1 /= kappa - 1
+        exp_factor1 = _κa * _τ ^ (2 / _κa)
+        exp_factor1 /= _κa - 1
 
-        exp_factor2 = 1 - betaa ^ 4
-        exp_factor2 /= 1 - betaa ^ 4 * tou ^ (2 / kappa)
+        exp_factor2 = 1 - _βa ^ 4
+        exp_factor2 /= 1 - _βa ^ 4 * _τ ^ (2 / _κa)
 
-        exp_factor3 = 1 - tou ^ ((kappa - 1) / kappa)
-        exp_factor3 /= 1 - tou
+        exp_factor3 = 1 - _τ ^ ((_κa - 1) / _κa)
+        exp_factor3 /= 1 - _τ
 
         exp_factor = Math.Sqrt(exp_factor1 * exp_factor2 * exp_factor3)
 
         '------------- itteratie-------------------
-        flow_kghr = NumericUpDown1.Value            '[kg/h]
-        flow_kgs = flow_kghr / 3600                 '[kg/sec]
-        flow_m3sec = flow_kghr / (3600 * _ρ)        '[m3/s]
+        _flow_kghr = NumericUpDown1.Value            '[kg/h]
+        _flow_kgs = _flow_kghr / 3600                '[kg/sec]
+        _flow_m3sec = _flow_kghr * _ρ / 3600         '[m3/s]
 
-        area_in = Math.PI / 4 * dia_in ^ 2          '[m2]
-        speed_inlet = flow_m3sec / area_in          '[m/s] inlet
+        _area_in = Math.PI / 4 * _dia_in ^ 2         '[m2]
+        _v_inlet = _flow_m3sec / _area_in            '[m/s] inlet
 
-        Reynolds = speed_inlet * dia_in * _ρ / dyn_visco
+        _Reynolds = _v_inlet * _dia_in * _ρ / _dyn_visco
 
         '------- ISO5167-1:2003, SECTION 5.2 page 8-------------
-        A2b = C_classic * exp_factor * betaa ^ 2 / Math.Sqrt(1 - betaa ^ 4)
-        A2a = 4 * flow_kgs / (PI * dia_in ^ 2 * Math.Sqrt(2 * _dp_tap * _ρ))
+        A2b = _C_classic * exp_factor * _βa ^ 2 / Math.Sqrt(1 - _βa ^ 4)
+        A2a = 4 * _flow_kgs / (PI * _dia_in ^ 2 * Math.Sqrt(2 * _dp_tap * _ρ))
 
         a2c = A2a - A2b
         Return (a2c)
     End Function
     Private Sub Present_results()
         Try
-            NumericUpDown1.Value = CDec(flow_kghr)            '[kg/m3]
-            NumericUpDown7.Value = CDec(kappa)                'Isentropic exponent
-            NumericUpDown2.Value = CDec(_ρ)                   '[kg/m3]
-            NumericUpDown6.Value = CDec(dyn_visco * 10 ^ 6)   'dyn_visco
-            NumericUpDown4.Value = CDec(dia_in * 1000)        '[m] classis venturi inlet diameter = outlet diameter
-            NumericUpDown5.Value = CDec(beta)                 '[-]
+            NumericUpDown1.Value = CDec(_flow_kghr)             '[kg/m3]
+            NumericUpDown7.Value = CDec(_κa)                    'Isentropic exponent
+            NumericUpDown2.Value = CDec(_ρ)                     '[kg/m3]
+            NumericUpDown6.Value = CDec(_dyn_visco * 10 ^ 6)    '_dyn_visco
+            NumericUpDown4.Value = CDec(_dia_in * 1000)         '[m] classis venturi inlet diameter = outlet diameter
+            TextBox46.Text = _β.ToString("0.00")                '[-]
 
-            TextBox1.Text = Math.Round(dia_keel * 1000, 0).ToString     '[mm] keel diameter
-            TextBox2.Text = C_classic.ToString
-            TextBox3.Text = Math.Round(Reynolds, 0).ToString            '[-]
-            TextBox4.Text = Math.Round(speed_inlet, 1).ToString         '[m/s]
+            TextBox1.Text = Math.Round(_dia_keel * 1000, 0).ToString     '[mm] keel diameter
+            TextBox2.Text = _C_classic.ToString
+            TextBox3.Text = Math.Round(_Reynolds, 0).ToString            '[-]
+            TextBox4.Text = Math.Round(_v_inlet, 1).ToString            '[m/s]
             TextBox5.Text = Math.Round(exp_factor, 3).ToString          '[-]
             TextBox13.Text = Math.Round(_p2_tap / 100, 1).ToString       '[Pa]->[mBar]
-            TextBox12.Text = Math.Round(tou, 4).ToString
-            TextBox15.Text = Round(dia_in * 1000, 0).ToString       'Diameter in
-            TextBox16.Text = Math.Round(flow_m3sec, 3).ToString
-            TextBox17.Text = Round(dia_keel * 1000, 0).ToString     'Diameter keel
+            TextBox12.Text = Math.Round(_τ, 4).ToString
+            TextBox15.Text = Round(_dia_in * 1000, 0).ToString       'Diameter in
+            TextBox16.Text = Math.Round(_flow_m3sec, 3).ToString
+            TextBox17.Text = Round(_dia_keel * 1000, 0).ToString     'Diameter keel
             TextBox23.Text = Round(ξ_pr_loss / 100, 2).ToString     'Unrecovered pressure loss [Pa]->[mBar]
             TextBox26.Text = Round(zeta, 2).ToString                'Resistance coeffi venturi assembly
+            TextBox48.Text = _flow_kgs.ToString("0.00")
 
-            '------- Beta check --------------
-            If beta < 0.4 Or beta > 0.7 Then
-                NumericUpDown5.BackColor = Color.Red
+            '------- _β check --------------
+            If _β < 0.4 Or _β > 0.7 Then
+                TextBox46.BackColor = Color.Red
             Else
-                NumericUpDown5.BackColor = Color.LightGreen
+                TextBox46.BackColor = Color.LightGreen
             End If
 
-            '------- Tou check --------------
-            If tou < 0.75 Then
+            '------- _τ check --------------
+            If _τ < 0.75 Then
                 TextBox12.BackColor = Color.Red
             Else
                 TextBox12.BackColor = Color.LightGreen
             End If
 
-            '------- Reynolds check-----------
-            If Reynolds < 2.0 * 10 ^ 5 Or Reynolds > 2.0 * 10 ^ 6 Then
+            '------- _Reynolds check-----------
+            If _Reynolds < 2.0 * 10 ^ 5 Or _Reynolds > 2.0 * 10 ^ 6 Then
                 TextBox3.BackColor = Color.Red
-                If Reynolds < 2.0 * 10 ^ 5 Then Label10.Text = "Reynolds, Te lage snelheid"
-                If Reynolds > 2.0 * 10 ^ 6 Then Label10.Text = "Reynolds, Te Hoge snelheid"
+                If _Reynolds < 2.0 * 10 ^ 5 Then Label10.Text = "_Reynolds, Te lage snelheid"
+                If _Reynolds > 2.0 * 10 ^ 6 Then Label10.Text = "_Reynolds, Te Hoge snelheid"
             Else
                 TextBox3.BackColor = Color.LightGreen
-                Label10.Text = "Reynolds OK"
+                Label10.Text = "_Reynolds OK"
             End If
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Error 845")  ' Show the exception's message.
@@ -329,7 +348,7 @@ Public Class Form1
             Chart1.ChartAreas.Add("ChartArea0")
             Chart1.Series(0).ChartArea = "ChartArea0"
             Chart1.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Line
-            Chart1.Titles.Add("Determine Beta" & vbCrLf & "ISO 5167-1:2003, Section 5.2")
+            Chart1.Titles.Add("Determine _β" & vbCrLf & "ISO 5167-1:2003, Section 5.2" & vbCrLf & "(A2 must be zero)")
             Chart1.Titles(0).Font = New Font("Arial", 12, System.Drawing.FontStyle.Bold)
             Chart1.Series(0).Name = "Koppel[%]"
             Chart1.Series(0).Color = Color.Blue
@@ -338,7 +357,7 @@ Public Class Form1
             Chart1.ChartAreas("ChartArea0").AxisX.Maximum = 1
             Chart1.ChartAreas("ChartArea0").AxisX.MinorTickMark.Enabled = True
             Chart1.ChartAreas("ChartArea0").AxisY.Title = "Invariant A2"
-            Chart1.ChartAreas("ChartArea0").AxisX.Title = "Beta [-]"
+            Chart1.ChartAreas("ChartArea0").AxisX.Title = "_β [-]"
 
             '------ data for the Chart -----------------------------
             For x = 0 To 1.0 Step 0.01
@@ -346,8 +365,8 @@ Public Class Form1
                 Chart1.Series(0).Points.AddXY(x, y)
             Next x
 
-            '------ data for the actual beta value -----------------
-            Calc_A2(beta)
+            '------ data for the actual _β value -----------------
+            Calc_A2(_β)
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Error 206")  ' Show the exception's message.
         End Try
@@ -359,18 +378,18 @@ Public Class Form1
         Dim φ_divert As Double
 
         φ_divert = NumericUpDown9.Value                          'Diversion angle
-        deltad = (dia_in - dia_keel) / 2
-        TextBox15.Text = Round(dia_in * 1000, 0).ToString       'Diameter in
-        TextBox17.Text = Round(dia_keel * 1000, 0).ToString     'Diameter keel
+        deltad = (_dia_in - _dia_keel) / 2
+        TextBox15.Text = Round(_dia_in * 1000, 0).ToString       'Diameter in
+        TextBox17.Text = Round(_dia_keel * 1000, 0).ToString     'Diameter keel
 
-        Length(0) = 2 * dia_in                                  'Bocht R=D bij fan intake
-        Length(1) = 3 * dia_in                                  'Recht in 
+        Length(0) = 2 * _dia_in                                  'Bocht R=D bij fan intake
+        Length(1) = 3 * _dia_in                                  'Recht in 
         Length(2) = deltad / Math.Tan(NumericUpDown3.Value * Math.PI / 180)       'Convergeren
-        Length(3) = dia_keel                                    'Meten
+        Length(3) = _dia_keel                                    'Meten
         Length(4) = deltad / Math.Tan(φ_divert * Math.PI / 180)       'Divergeren
-        Length(5) = 4 * dia_keel                                'Recht achter Venturi
-        Length(6) = dia_in / 4                                  'Lucht inlaat
-        Length(7) = dia_in                                      'Chinese hat
+        Length(5) = 4 * _dia_keel                                'Recht achter Venturi
+        Length(6) = _dia_in / 4                                  'Lucht inlaat
+        Length(7) = _dia_in                                      'Chinese hat
         Length(8) = Length(0) + Length(1) + Length(2) + Length(3) + Length(4) + Length(5) + Length(6) + Length(7)
 
         TextBox20.Text = Round(Length(0) * 1000, 0).ToString    'Bend
@@ -383,19 +402,19 @@ Public Class Form1
         TextBox19.Text = Round(Length(7) * 1000, 0).ToString    'Chinese hat
         TextBox11.Text = Round(Length(8) * 1000, 0).ToString    'Total
 
-        TextBox22.Text = Round(dia_keel * 1000, 0).ToString     'Length C
+        TextBox22.Text = Round(_dia_keel * 1000, 0).ToString     'Length C
     End Sub
 
     Private Sub Get_data_from_screen()
         Try
-            flow_kghr = NumericUpDown1.Value            '[kg/m3]
-            kappa = NumericUpDown7.Value                'Isentropic exponent
+            _flow_kghr = NumericUpDown1.Value            '[kg/m3]
+            _κa = NumericUpDown7.Value                'Isentropic exponent
             _ρ = NumericUpDown2.Value                   '[kg/m3]
-            dyn_visco = NumericUpDown6.Value / 10 ^ 6   'kin_visco
+            _dyn_visco = NumericUpDown6.Value / 10 ^ 6   'kin_visco
             _p1_tap = NumericUpDown11.Value * 100       '[mBar]->[pa]
             Double.TryParse(CType(ComboBox1.SelectedItem, String), _dp_tap)
             _dp_tap *= 100                              '[mbar] --> [Pa]
-            dia_in = NumericUpDown4.Value / 1000        '[m] classis venturi inlet diameter = outlet diameter
+            _dia_in = NumericUpDown4.Value / 1000        '[m] classis venturi inlet diameter = outlet diameter
 
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Error 254")  ' Show the exception's message.
@@ -473,11 +492,11 @@ Public Class Form1
             row = 1
             oTable.Cell(row, 1).Range.Text = "Input Data"
             row += 1
-            oTable.Cell(row, 1).Range.Text = "Air _ρ"
+            oTable.Cell(row, 1).Range.Text = "Air density _ρ"
             oTable.Cell(row, 2).Range.Text = NumericUpDown2.Value.ToString("0.00")
             oTable.Cell(row, 3).Range.Text = "[kg/m3]"
             row += 1
-            oTable.Cell(row, 1).Range.Text = "Dynamic visco"
+            oTable.Cell(row, 1).Range.Text = "Dynamic viscosity"
             oTable.Cell(row, 2).Range.Text = NumericUpDown6.Value.ToString("0.0")
             oTable.Cell(row, 3).Range.Text = "[Pa.s 10^-6]"
             row += 1
@@ -492,11 +511,11 @@ Public Class Form1
             oTable.Cell(row, 1).Range.Text = "dp @ max flow"
             oTable.Cell(row, 2).Range.Text = (_dp_tap / 100).ToString("0.0")
             oTable.Cell(row, 3).Range.Text = "[mBar]"
-            MessageBox.Show("line 474" & _dp_tap.ToString)
+
             row += 1
             oTable.Cell(row, 1).Range.Text = "Mass flow"
-            oTable.Cell(row, 2).Range.Text = NumericUpDown1.Value.ToString("0")
-            oTable.Cell(row, 3).Range.Text = "[kg/h]"
+            oTable.Cell(row, 2).Range.Text = _flow_kghr.ToString("0") & vbTab & _flow_kgs.ToString("0.00")
+            oTable.Cell(row, 3).Range.Text = "[kg/h, kg/s]"
             row += 1
             oTable.Cell(row, 1).Range.Text = "Volume flow"
             oTable.Cell(row, 2).Range.Text = TextBox16.Text
@@ -510,6 +529,10 @@ Public Class Form1
             oTable.Cell(row, 2).Range.Text = TextBox1.Text
             oTable.Cell(row, 3).Range.Text = "[mm]"
             row += 1
+            oTable.Cell(row, 1).Range.Text = "_β Diameter ration"
+            oTable.Cell(row, 2).Range.Text = TextBox46.Text
+            oTable.Cell(row, 3).Range.Text = "[-]"
+            row += 1
             oTable.Cell(row, 1).Range.Text = "Inlet speed"
             oTable.Cell(row, 2).Range.Text = TextBox4.Text
             oTable.Cell(row, 3).Range.Text = "[m/s]"
@@ -518,15 +541,12 @@ Public Class Form1
             oTable.Cell(row, 2).Range.Text = TextBox3.Text
             oTable.Cell(row, 3).Range.Text = "[-]"
             row += 1
-            oTable.Cell(row, 1).Range.Text = "Beta"
-            oTable.Cell(row, 2).Range.Text = Round(NumericUpDown5.Value, 3).ToString("0.00")
-            oTable.Cell(row, 3).Range.Text = "[-]"
-            row += 1
+
             oTable.Cell(row, 1).Range.Text = "Discharge Coefficient"
             oTable.Cell(row, 2).Range.Text = TextBox2.Text
             oTable.Cell(row, 3).Range.Text = "[-]"
             row += 1
-            oTable.Cell(row, 1).Range.Text = "Expansion factor"
+            oTable.Cell(row, 1).Range.Text = "ε Expansibility factor"
             oTable.Cell(row, 2).Range.Text = TextBox5.Text
             oTable.Cell(row, 3).Range.Text = "[-]"
             row += 1
@@ -547,7 +567,7 @@ Public Class Form1
             oTable.Cell(row, 3).Range.Text = "[mm]"
             row += 1
             oTable.Cell(row, 1).Range.Text = "Diverging angle, length"
-            oTable.Cell(row, 2).Range.Text = NumericUpDown9.Value.ToString("0.0")
+            oTable.Cell(row, 2).Range.Text = NumericUpDown9.Value.ToString("0.0") & vbTab & TextBox9.Text
             oTable.Cell(row, 3).Range.Text = "[deg, mm]"
             row += 1
             oTable.Cell(row, 1).Range.Text = "Down stream straight length"
@@ -599,7 +619,7 @@ Public Class Form1
             Chart2.Series(0).ChartArea = "ChartArea0"
             Chart2.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Line
             Chart2.Titles.Add("Venturi flow computation acc. " & "ISO 5167-4:2003 Chapter 4")
-            Chart2.Titles.Add("Discharge Coefficient= " & C_classic.ToString & ", Dia.throat= " & Round(dia_keel * 1000, 1).ToString & " [mm]" & ", _ρ= " & _ρ.ToString & " [kg/m3]" & ", K= " & kappa.ToString & " [-]")
+            Chart2.Titles.Add("Discharge Coefficient= " & _C_classic.ToString & ", Dia.throat= " & Round(_dia_keel * 1000, 1).ToString & " [mm]" & ", _ρ= " & _ρ.ToString & " [kg/m3]" & ", K= " & _κa.ToString & " [-]")
             Chart2.Titles(0).Font = New Font("Arial", 12, System.Drawing.FontStyle.Bold)
             Chart2.Series(0).Color = Color.Black
             Chart2.Series(0).IsVisibleInLegend = False
@@ -614,8 +634,8 @@ Public Class Form1
             '----------------- data for the Chart -----------------
             '--------------- see ISO 5167-4 Equation 1-------------
             For x = 0 To _dp_tap Step 1
-                y = C_classic / Sqrt(1 - beta ^ 4)
-                y *= exp_factor * PI / 4 * dia_keel ^ 2 * Sqrt(2 * x * _ρ)
+                y = _C_classic / Sqrt(1 - _β ^ 4)
+                y *= exp_factor * PI / 4 * _dia_keel ^ 2 * Sqrt(2 * x * _ρ)
                 y *= 3600                               '[kg/h]
                 Chart2.Series(0).Points.AddXY(x, y)
             Next x
@@ -625,15 +645,15 @@ Public Class Form1
     End Sub
 
     Function Calc_dyn_vis() As Double
-        Dim tk, dyn_visco As Double
+        Dim tk, _dyn_visco As Double
 
         'Dynamic Viscosity calculation (valid for -100K too 800K)
         'See http://onlinelibrary.wiley.com/doi/10.1002/9780470516430.app2/pdf
 
         tk = NumericUpDown10.Value + 273.15
-        dyn_visco = 1.458 * tk ^ 1.5 / (tk + 110.4)    '[Pas * 10^-6]
+        _dyn_visco = 1.458 * tk ^ 1.5 / (tk + 110.4)    '[Pas * 10^-6]
 
-        Return (dyn_visco)
+        Return (_dyn_visco)
     End Function
 
 End Class
