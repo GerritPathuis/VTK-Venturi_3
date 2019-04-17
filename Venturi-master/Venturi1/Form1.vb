@@ -188,12 +188,12 @@ Public Class Form1
         _dp_tap *= 100                          '[mbar] --> [Pa]
 
         '--------- calc ---------------
-        _flow_m3sec = _flow_kghr / (3600 * _ρ)    '[m3/s]
-        _area_in = Math.PI / 4 * _dia_in ^ 2      '[m2]
+        _flow_m3sec = _flow_kghr / (3600 * _ρ) '[m3/s]
+        _area_in = Math.PI / 4 * _dia_in ^ 2   '[m2]
         _v_inlet = _flow_m3sec / _area_in      '[m/s] keel
-        _p2_tap = _p1_tap - _dp_tap             '[Pa]
+        _p2_tap = _p1_tap - _dp_tap            '[Pa]
         _τ = _p2_tap / _p1_tap                 'Pressure ratio
-        _dia_keel = _β * _dia_in                '[mm]
+        _dia_keel = _β * _dia_in               '[mm]
 
         '----------- terug zetten op het scherm-------------
         Present_results()
@@ -270,10 +270,10 @@ Public Class Form1
 
         exp_factor = Math.Sqrt(exp_factor1 * exp_factor2 * exp_factor3)
 
-        '------------- itteratie-------------------
-        _flow_kghr = NumericUpDown1.Value            '[kg/h]
-        _flow_kgs = _flow_kghr / 3600                '[kg/sec]
-        _flow_m3sec = _flow_kghr * _ρ / 3600         '[m3/s]
+        '------------- iteratie-------------------
+        _flow_kghr = NumericUpDown1.Value            '[kg/h] inlet
+        _flow_kgs = _flow_kghr / 3600                '[kg/sec] inlet
+        _flow_m3sec = _flow_kghr / (3600 * _ρ)       '[m3/s] inlet
 
         _area_in = Math.PI / 4 * _dia_in ^ 2         '[m2]
         _v_inlet = _flow_m3sec / _area_in            '[m/s] inlet
