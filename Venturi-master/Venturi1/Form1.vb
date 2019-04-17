@@ -305,6 +305,7 @@ Public Class Form1
             TextBox12.Text = Math.Round(_τ, 4).ToString
             TextBox15.Text = Round(_dia_in * 1000, 0).ToString       'Diameter in
             TextBox16.Text = Math.Round(_flow_m3sec, 3).ToString
+            TextBox51.Text = Math.Round(_flow_m3sec * 3600, 0).ToString
             TextBox17.Text = Round(_dia_keel * 1000, 0).ToString     'Diameter keel
             TextBox23.Text = Round(ξ_pr_loss / 100, 2).ToString     'Unrecovered pressure loss [Pa]->[mBar]
             TextBox26.Text = Round(zeta, 2).ToString                'Resistance coeffi venturi assembly
