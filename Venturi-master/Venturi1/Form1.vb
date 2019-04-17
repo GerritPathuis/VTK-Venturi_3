@@ -1,10 +1,16 @@
 ﻿Imports System.IO
+Imports System.Text
 Imports System.Math
+Imports System.Globalization
+Imports System.Threading
 Imports Word = Microsoft.Office.Interop.Word
 
 Public Class Form1
-    Dim _flow_kghr, _flow_kgs, _flow_m3sec As Double
-    Dim _dia_in, _dia_keel As Double        'Dimensions
+    Dim _flow_kghr As Double                'Flow [kg/hr]
+    Dim _flow_kgs As Double                 'Flow [kg/s]
+    Dim _flow_m3sec As Double               'Flow [m3/s]
+    Dim _dia_in As Double                   'Dia inlet
+    Dim _dia_keel As Double                 'Dia keel
     Dim _β As Double                        'Diameter ratio 
     Dim _dyn_visco, _ρ As Double            'Medium info
     Dim _C_classic As Double                'Discharge coefficient
@@ -16,6 +22,11 @@ Public Class Form1
     Dim zeta As Double                      'Resistance coeffi 
     Dim exp_factor, exp_factor1, exp_factor2, exp_factor3 As Double
     Dim A2a, A2b, a2c As Double
+
+    '----------- directory's-----------
+    Dim dirpath_Eng As String = "N:\Engineering\VBasic\Venturi_input\"
+    Dim dirpath_Rap As String = "N:\Engineering\VBasic\Venturi_rapport_copy\"
+    Dim dirpath_Home As String = "C:\Temp\"
 
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown15.ValueChanged, NumericUpDown14.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, NumericUpDown19.ValueChanged, NumericUpDown17.ValueChanged, NumericUpDown16.ValueChanged, TabPage7.Enter
         Calc_rectangle_venturi()
@@ -165,15 +176,15 @@ Public Class Form1
        "Classieke Venturi diameter 200-1200mm"
 
         '------------- Initial values----------------------
-        _flow_kghr = 30000           '[kg/m3]
-        _flow_kgs = _flow_kghr / 3600 '[kg/sec]
-        _ρ = 1.2                     '[kg/m3]
-        _κa = 1.4                 'Isentropic exponent
-        _p1_tap = 101325             '[pa]
+        _flow_kghr = 30000              '[kg/m3]
+        _flow_kgs = _flow_kghr / 3600   '[kg/sec]
+        _ρ = 1.2                        '[kg/m3]
+        _κa = 1.4                       'Isentropic exponent
+        _p1_tap = 101325                '[pa]
 
-        _dia_in = 0.8                '[m] classis venturi inlet diameter = outlet diameter
-        _β = 0.5                     '[-]
-        _C_classic = 0.985           'See ISO5167-4 section 5.5.4
+        _dia_in = 0.8                   '[m] classis venturi inlet diameter = outlet diameter
+        _β = 0.5                        '[-]
+        _C_classic = 0.985              'See ISO5167-4 section 5.5.4
 
         '========== dp range instrument [mbar] =============
         ComboBox1.Items.Add("    12.5")
@@ -201,6 +212,10 @@ Public Class Form1
     End Sub
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click, NumericUpDown2.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown7.ValueChanged, NumericUpDown6.ValueChanged, NumericUpDown1.ValueChanged, NumericUpDown4.ValueChanged, ComboBox1.SelectedIndexChanged
         Calc_venturi1()
+    End Sub
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        Save_tofile()
     End Sub
 
     Private Sub Calc_venturi1()
@@ -255,7 +270,7 @@ Public Class Form1
     Private Function Calc_A2(_βa As Double) As Double
 
         '----- calc -------------
-        _p2_tap = _p1_tap - _dp_tap                 '[Pa]
+        _p2_tap = _p1_tap - _dp_tap                '[Pa]
         _τ = _p2_tap / _p1_tap                     'Pressure ratio
 
         '---------- expansie factor ISI 5167-4 Equation 2---------
@@ -298,17 +313,17 @@ Public Class Form1
 
             TextBox1.Text = Math.Round(_dia_keel * 1000, 0).ToString     '[mm] keel diameter
             TextBox2.Text = _C_classic.ToString
-            TextBox3.Text = Math.Round(_Reynolds, 0).ToString            '[-]
+            TextBox3.Text = Math.Round(_Reynolds, 0).ToString           '[-]
             TextBox4.Text = Math.Round(_v_inlet, 1).ToString            '[m/s]
             TextBox5.Text = Math.Round(exp_factor, 3).ToString          '[-]
-            TextBox13.Text = Math.Round(_p2_tap / 100, 1).ToString       '[Pa]->[mBar]
+            TextBox13.Text = Math.Round(_p2_tap / 100, 1).ToString      '[Pa]->[mBar]
             TextBox12.Text = Math.Round(_τ, 4).ToString
-            TextBox15.Text = Round(_dia_in * 1000, 0).ToString       'Diameter in
-            TextBox16.Text = Math.Round(_flow_m3sec, 3).ToString
-            TextBox51.Text = Math.Round(_flow_m3sec * 3600, 0).ToString
-            TextBox17.Text = Round(_dia_keel * 1000, 0).ToString     'Diameter keel
-            TextBox23.Text = Round(ξ_pr_loss / 100, 2).ToString     'Unrecovered pressure loss [Pa]->[mBar]
-            TextBox26.Text = Round(zeta, 2).ToString                'Resistance coeffi venturi assembly
+            TextBox15.Text = (_dia_in * 1000).ToString("0")             'Diameter inlet [m]->[mm]
+            TextBox16.Text = _flow_m3sec.ToString("0.000")              'Flow [m3/s]
+            TextBox51.Text = (_flow_m3sec * 3600).ToString("0")         'Flow [m3/h]
+            TextBox17.Text = (_dia_keel * 1000).ToString("0")           'Diameter keel
+            TextBox23.Text = (ξ_pr_loss / 100).ToString("0.00")         'Unrecovered pressure loss [Pa]->[mBar]
+            TextBox26.Text = zeta.ToString("0.00")                      'Resistance coeffi venturi assembly
             TextBox48.Text = _flow_kgs.ToString("0.00")
 
             '------- _β check --------------
@@ -337,6 +352,10 @@ Public Class Form1
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Error 845")  ' Show the exception's message.
         End Try
+    End Sub
+
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        Read_file()
     End Sub
 
     Private Sub Draw_chart1()
@@ -408,14 +427,14 @@ Public Class Form1
 
     Private Sub Get_data_from_screen()
         Try
-            _flow_kghr = NumericUpDown1.Value            '[kg/m3]
-            _κa = NumericUpDown7.Value                'Isentropic exponent
-            _ρ = NumericUpDown2.Value                   '[kg/m3]
-            _dyn_visco = NumericUpDown6.Value / 10 ^ 6   'kin_visco
-            _p1_tap = NumericUpDown11.Value * 100       '[mBar]->[pa]
+            _flow_kghr = NumericUpDown1.Value               '[kg/hr]
+            _κa = NumericUpDown7.Value                      'Isentropic exponent
+            _ρ = NumericUpDown2.Value                       '[kg/m3]
+            _dyn_visco = NumericUpDown6.Value / 10 ^ 6      'kin_visco
+            _p1_tap = NumericUpDown11.Value * 100           '[mBar]->[pa]
             Double.TryParse(CType(ComboBox1.SelectedItem, String), _dp_tap)
-            _dp_tap *= 100                              '[mbar] --> [Pa]
-            _dia_in = NumericUpDown4.Value / 1000        '[m] classis venturi inlet diameter = outlet diameter
+            _dp_tap *= 100                                  '[mbar] --> [Pa]
+            _dia_in = NumericUpDown4.Value / 1000           '[m] classis venturi inlet diameter = outlet diameter
 
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Error 254")  ' Show the exception's message.
@@ -656,5 +675,195 @@ Public Class Form1
 
         Return (_dyn_visco)
     End Function
+    'Save control settings and case_x_conditions to file
+    Private Sub Save_tofile()
+        Dim temp_string As String
+        Dim filename As String = "PV_Calc_" & TextBox24.Text & "_" & TextBox25.Text & "_" & TextBox52.Text & DateTime.Now.ToString("_yyyy_MM_dd") & ".vtk"
+        Dim all_num, all_combo, all_check, all_radio As New List(Of Control)
+        Dim i As Integer
 
+        If String.IsNullOrEmpty(TextBox8.Text) Then
+            TextBox8.Text = "-"
+        End If
+
+        temp_string = TextBox24.Text & ";" & TextBox25.Text & ";" & TextBox52.Text & ";"
+        temp_string &= vbCrLf & "BREAK" & vbCrLf & ";"
+
+        '-------- find all numeric, combobox, checkbox and radiobutton controls -----------------
+        FindControlRecursive(all_num, Me, GetType(NumericUpDown))   'Find the control
+        all_num = all_num.OrderBy(Function(x) x.Name).ToList()      'Alphabetical order
+        For i = 0 To all_num.Count - 1
+            Dim grbx As NumericUpDown = CType(all_num(i), NumericUpDown)
+            temp_string &= grbx.Value.ToString & ";"
+        Next
+        temp_string &= vbCrLf & "BREAK" & vbCrLf & ";"
+
+        '-------- find all combobox controls and save
+        FindControlRecursive(all_combo, Me, GetType(ComboBox))      'Find the control
+        all_combo = all_combo.OrderBy(Function(x) x.Name).ToList()   'Alphabetical order
+        For i = 0 To all_combo.Count - 1
+            Dim grbx As ComboBox = CType(all_combo(i), ComboBox)
+            temp_string &= grbx.SelectedItem.ToString & ";"
+        Next
+        temp_string &= vbCrLf & "BREAK" & vbCrLf & ";"
+
+        '-------- find all checkbox controls and save
+        FindControlRecursive(all_check, Me, GetType(CheckBox))      'Find the control
+        all_check = all_check.OrderBy(Function(x) x.Name).ToList()  'Alphabetical order
+        For i = 0 To all_check.Count - 1
+            Dim grbx As CheckBox = CType(all_check(i), CheckBox)
+            temp_string &= grbx.Checked.ToString & ";"
+        Next
+        temp_string &= vbCrLf & "BREAK" & vbCrLf & ";"
+
+        '-------- find all radio controls and save
+        FindControlRecursive(all_radio, Me, GetType(RadioButton))   'Find the control
+        all_radio = all_radio.OrderBy(Function(x) x.Name).ToList()  'Alphabetical order
+        For i = 0 To all_radio.Count - 1
+            Dim grbx As RadioButton = CType(all_radio(i), RadioButton)
+            temp_string &= grbx.Checked.ToString & ";"
+        Next
+        temp_string &= vbCrLf & "BREAK" & vbCrLf & ";"
+
+        '--------- add notes -----
+        temp_string &= TextBox53.Text & ";"
+
+        '---- if path not exist then create one----------
+        Try
+            If (Not System.IO.Directory.Exists(dirpath_Home)) Then System.IO.Directory.CreateDirectory(dirpath_Home)
+            If (Not System.IO.Directory.Exists(dirpath_Eng)) Then System.IO.Directory.CreateDirectory(dirpath_Eng)
+            If (Not System.IO.Directory.Exists(dirpath_Rap)) Then System.IO.Directory.CreateDirectory(dirpath_Rap)
+        Catch ex As Exception
+        End Try
+
+        Try
+            If CInt(temp_string.Length.ToString) > 100 Then      'String may be empty
+                If Directory.Exists(dirpath_Eng) Then
+                    File.WriteAllText(dirpath_Eng & filename, temp_string, Encoding.ASCII)      'used at VTK
+                Else
+                    File.WriteAllText(dirpath_Home & filename, temp_string, Encoding.ASCII)     'used at home
+                End If
+            End If
+        Catch ex As Exception
+            MessageBox.Show("Line 5062, " & ex.Message)  ' Show the exception's message.
+        End Try
+    End Sub
+    'Retrieve control settings and case_x_conditions from file
+    'Split the file string into 5 separate strings
+    'Each string represents a control type (combobox, checkbox,..)
+    'Then split up the secton string into part to read into the parameters
+    Private Sub Read_file()
+        Dim control_words(), words() As String
+        Dim i As Integer
+        Dim ttt As Double
+        Dim k As Integer = 0
+        Dim all_num, all_combo, all_check, all_radio As New List(Of Control)
+        Dim separators() As String = {";"}
+        Dim separators1() As String = {"BREAK"}
+
+        OpenFileDialog1.FileName = "Venturi*"
+        If Directory.Exists(dirpath_Eng) Then
+            OpenFileDialog1.InitialDirectory = dirpath_Eng  'used at VTK
+        Else
+            OpenFileDialog1.InitialDirectory = dirpath_Home  'used at home
+        End If
+
+        OpenFileDialog1.Title = "Open a Text File"
+        OpenFileDialog1.Filter = "VTK Files|*.vtk"
+
+        If OpenFileDialog1.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
+            Dim readText As String = File.ReadAllText(OpenFileDialog1.FileName, Encoding.ASCII)
+            control_words = readText.Split(separators1, StringSplitOptions.None) 'Split the read file content
+
+            '----- retrieve case condition-----
+            words = control_words(0).Split(separators, StringSplitOptions.None) 'Split first line the read file content
+            TextBox24.Text = words(0)                  'Project number
+            TextBox25.Text = words(1)                  'Project name
+            TextBox52.Text = words(2)                  'Tag ID
+
+            '---------- terugzetten numeric controls -----------------
+            FindControlRecursive(all_num, Me, GetType(NumericUpDown))
+            all_num = all_num.OrderBy(Function(x) x.Name).ToList()                  'Alphabetical order
+            words = control_words(1).Split(separators, StringSplitOptions.None)     'Split the read file content
+            For i = 0 To all_num.Count - 1
+                Dim grbx As NumericUpDown = CType(all_num(i), NumericUpDown)
+                '--- dit deel voorkomt problemen bij het uitbreiden van het aantal numeric controls--
+                If (i < words.Length - 1) Then
+                    If Not (Double.TryParse(words(i + 1), ttt)) Then MessageBox.Show("Numeric controls conversion problem occured")
+                    If ttt <= grbx.Maximum And ttt >= grbx.Minimum Then
+                        grbx.Value = CDec(ttt)          'OK
+                    Else
+                        grbx.Value = grbx.Minimum       'NOK
+                        MessageBox.Show("Numeric controls value out of ousode min-max range, Minimum value is used")
+                    End If
+                Else
+                    MessageBox.Show("Warning last Numeric controls not found in file")  'NOK
+                End If
+            Next
+
+            '---------- terugzetten combobox controls -----------------
+            FindControlRecursive(all_combo, Me, GetType(ComboBox))
+            all_combo = all_combo.OrderBy(Function(x) x.Name).ToList()                  'Alphabetical order
+            words = control_words(2).Split(separators, StringSplitOptions.None) 'Split the read file content
+            For i = 0 To all_combo.Count - 1
+                Dim grbx As ComboBox = CType(all_combo(i), ComboBox)
+                '--- dit deel voorkomt problemen bij het uitbreiden van het aantal checkboxes--
+                If (i < words.Length - 1) Then
+                    grbx.SelectedItem = words(i + 1)
+                Else
+                    MessageBox.Show("Warning last combobox not found in file")
+                End If
+            Next
+
+            '---------- terugzetten checkbox controls -----------------
+            FindControlRecursive(all_check, Me, GetType(CheckBox))
+            all_check = all_check.OrderBy(Function(x) x.Name).ToList()                  'Alphabetical order
+            words = control_words(3).Split(separators, StringSplitOptions.None) 'Split the read file content
+            For i = 0 To all_check.Count - 1
+                Dim grbx As CheckBox = CType(all_check(i), CheckBox)
+                '--- dit deel voorkomt problemen bij het uitbreiden van het aantal checkboxes--
+                If (i < words.Length - 1) Then
+                    Boolean.TryParse(words(i + 1), grbx.Checked)
+                Else
+                    MessageBox.Show("Warning last checkbox not found in file")
+                End If
+            Next
+
+            '---------- terugzetten radiobuttons controls -----------------
+            FindControlRecursive(all_radio, Me, GetType(RadioButton))
+            all_radio = all_radio.OrderBy(Function(x) x.Name).ToList()                  'Alphabetical order
+            words = control_words(4).Split(separators, StringSplitOptions.None) 'Split the read file content
+            For i = 0 To all_radio.Count - 1
+                Dim grbx As RadioButton = CType(all_radio(i), RadioButton)
+                '--- dit deel voorkomt problemen bij het uitbreiden van het aantal radiobuttons--
+                If (i < words.Length - 1) Then
+                    Boolean.TryParse(words(i + 1), grbx.Checked)
+                Else
+                    MessageBox.Show("Warning last radiobutton not found in file")
+                End If
+            Next
+            '---------- terugzetten Notes -- ---------------
+            If control_words.Count > 5 Then
+                words = control_words(5).Split(separators, StringSplitOptions.None) 'Split the read file content
+                TextBox53.Clear()
+                TextBox53.AppendText(words(1))
+            Else
+                MessageBox.Show("Warning Notes not found in file")
+            End If
+        End If
+    End Sub
+
+    '----------- Find all controls on form1------
+    'Nota Bene, sequence of found control may be differen, List sort is required
+    Public Shared Function FindControlRecursive(ByVal list As List(Of Control), ByVal parent As Control, ByVal ctrlType As System.Type) As List(Of Control)
+        If parent Is Nothing Then Return list
+
+        If parent.GetType Is ctrlType Then
+            list.Add(parent)
+        End If
+        For Each child As Control In parent.Controls
+            FindControlRecursive(list, child, ctrlType)
+        Next
+        Return list
+    End Function
 End Class
