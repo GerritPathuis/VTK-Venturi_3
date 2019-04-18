@@ -12,7 +12,8 @@ Public Class Form1
     Dim _dia_in As Double                   'Dia inlet
     Dim _dia_keel As Double                 'Dia keel
     Dim _β As Double                        'Diameter ratio 
-    Dim _dyn_visco, _ρ As Double            'Medium info
+    Dim _dyn_visco As Double                'air
+    Dim _ρ As Double                        'air density [kg/m3]
     Dim _C_classic As Double                'Discharge coefficient
     Dim _Reynolds As Double                 'Reynolds
     Dim _area_in, _v_inlet As Double        'Venturi data
@@ -22,6 +23,7 @@ Public Class Form1
     Dim ξ_pr_loss As Double                 'Unrecovered pressure loss
     Dim zeta As Double                      'Resistance coeffi 
     Dim _ε_iso As Double                    'Expansibility factor [-]
+    Dim _qm As Double                       'Mass flowrate [kg/s]
     Dim A2a, A2b, a2c As Double
 
     '----------- directory's-----------
@@ -163,8 +165,6 @@ Public Class Form1
         TextBox43.Text = v_inlet.ToString("0.0")    '[m3/s]
         TextBox44.Text = Inlet_sq.ToString("0.0")   '[-]
         TextBox45.Text = Throught_sq.ToString("0.0") '[-]
-        TextBox54.Text = DeIn.ToString("0")       'Diameter inlet [mm]
-        TextBox55.Text = DeT.ToString("0")     'Diameter keel [mm]
     End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click, NumericUpDown10.ValueChanged, TabPage5.Enter
@@ -185,7 +185,6 @@ Public Class Form1
         _ρ = 1.2                            '[kg/m3]
         _κa = 1.4                           'Isentropic exponent
         _p1_tap = 101325                    '[pa]
-
         _dia_in = 0.8                       '[m] classis venturi inlet diameter = outlet diameter
         _β = 0.5                            '[-]
         _C_classic = 0.985                  'See ISO5167-4 section 5.5.4
@@ -267,14 +266,18 @@ Public Class Form1
         '--------- resistance coefficient venturi assembly 
         zeta = 2 * ξ_pr_loss / (_ρ * _v_inlet ^ 2)
 
+        '--------- mass flow rate -----
+        _qm = _C_classic / Sqrt(1 - _β ^ 4) * _ε_iso * PI / 4 * _dia_keel ^ 2
+        _qm *= Sqrt(2 * _Δp_tap * _ρ)
+
         Draw_chart1()
         Present_results_iso()
     End Sub
 
     Private Function Calc_A2(_βa As Double) As Double
         Dim ε1, ε2, ε3 As Double
-        '============ ISO 5167-5 calculation ============
 
+        '============ ISO 5167-5 calculation ============
 
         '----- calc -------------
         _p2_tap = _p1_tap - _Δp_tap                '[Pa]
@@ -332,6 +335,8 @@ Public Class Form1
             TextBox23.Text = (ξ_pr_loss / 100).ToString("0.00")         'Unrecovered pressure loss [Pa]->[mBar]
             TextBox26.Text = zeta.ToString("0.00")                      'Resistance coeffi venturi assembly
             TextBox48.Text = _flow_kgsec.ToString("0.00")
+            TextBox54.Text = _qm.ToString("0.00")                       'Mass flow rate [kg/s]
+            TextBox55.Text = (_qm * 3600).ToString("0")                 'Mass flow rate [kg/h]
 
             '------- _β check --------------
             If _β < 0.4 Or _β > 0.7 Then
