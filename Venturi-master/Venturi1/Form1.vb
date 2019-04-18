@@ -138,7 +138,7 @@ Public Class Form1
             TextBox41.BackColor = Color.LightGreen
         End If
 
-        TextBox31.BackColor = CType(IIf(DeIn <= 1200, Color.LightGreen, Color.Red), Color)
+        TextBox31.BackColor = CType(IIf(DeIn <= 1200, Color.LightGreen, Color.Aqua), Color)
 
         TextBox14.Text = _area_inlet.ToString("0")
         TextBox28.Text = β.ToString("0.0000")
@@ -684,12 +684,12 @@ Public Class Form1
     'Save control settings and case_x_conditions to file
     Private Sub Save_tofile()
         Dim temp_string As String
-        Dim filename As String = "PV_Calc_" & TextBox24.Text & "_" & TextBox25.Text & "_" & TextBox52.Text & DateTime.Now.ToString("_yyyy_MM_dd") & ".vtk"
+        Dim filename As String = "Venturi_" & TextBox24.Text & "_" & TextBox25.Text & "_" & TextBox52.Text & DateTime.Now.ToString("_yyyy_MM_dd") & ".vtk"
         Dim all_num, all_combo, all_check, all_radio As New List(Of Control)
         Dim i As Integer
 
-        If String.IsNullOrEmpty(TextBox8.Text) Then
-            TextBox8.Text = "-"
+        If String.IsNullOrEmpty(TextBox24.Text) Then
+            TextBox24.Text = "Project"
         End If
 
         temp_string = TextBox24.Text & ";" & TextBox25.Text & ";" & TextBox52.Text & ";"

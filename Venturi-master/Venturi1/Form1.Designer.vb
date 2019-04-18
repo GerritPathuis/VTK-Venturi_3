@@ -333,6 +333,7 @@ Partial Class Form1
         Me.TextBox52.Name = "TextBox52"
         Me.TextBox52.Size = New System.Drawing.Size(273, 20)
         Me.TextBox52.TabIndex = 34
+        Me.TextBox52.Text = "Venturi"
         '
         'Button8
         '
@@ -407,7 +408,7 @@ Partial Class Form1
         '
         Me.Label40.AutoSize = True
         Me.Label40.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label40.Location = New System.Drawing.Point(418, 483)
+        Me.Label40.Location = New System.Drawing.Point(418, 461)
         Me.Label40.Name = "Label40"
         Me.Label40.Size = New System.Drawing.Size(104, 16)
         Me.Label40.TabIndex = 26
@@ -424,7 +425,7 @@ Partial Class Form1
         '
         Me.Label39.AutoSize = True
         Me.Label39.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label39.Location = New System.Drawing.Point(418, 457)
+        Me.Label39.Location = New System.Drawing.Point(418, 484)
         Me.Label39.Name = "Label39"
         Me.Label39.Size = New System.Drawing.Size(87, 16)
         Me.Label39.TabIndex = 24
@@ -436,6 +437,7 @@ Partial Class Form1
         Me.TextBox24.Name = "TextBox24"
         Me.TextBox24.Size = New System.Drawing.Size(273, 20)
         Me.TextBox24.TabIndex = 25
+        Me.TextBox24.Text = "P18."
         '
         'Button3
         '
@@ -2073,7 +2075,7 @@ Partial Class Form1
         '
         Me.Label56.AutoSize = True
         Me.Label56.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label56.Location = New System.Drawing.Point(14, 137)
+        Me.Label56.Location = New System.Drawing.Point(14, 139)
         Me.Label56.Name = "Label56"
         Me.Label56.Size = New System.Drawing.Size(135, 16)
         Me.Label56.TabIndex = 91
@@ -2093,7 +2095,7 @@ Partial Class Form1
         '
         Me.Label65.AutoSize = True
         Me.Label65.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label65.Location = New System.Drawing.Point(14, 160)
+        Me.Label65.Location = New System.Drawing.Point(14, 164)
         Me.Label65.Name = "Label65"
         Me.Label65.Size = New System.Drawing.Size(255, 16)
         Me.Label65.TabIndex = 89
