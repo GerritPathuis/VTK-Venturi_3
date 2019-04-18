@@ -52,9 +52,10 @@ Public Class Form1
         Dim ip As Double             'Inlet pressure
         Dim dp As Double            'Instrument dp
         Dim κ As Double = 1.4       'κ= Cp/Cv
-        Dim Ka As Double            'ka factor
+        Dim Kaf As Double           'ka factor
         Dim Cv As Double = 0.975    'factor rectangle venturi
         Dim ε_shell As Double       'fluids expansivity
+        Dim ε1_s, ε2_s, ε3_s As Double       'fluids expansivity
         Dim vis As Double           'Viscosity
         Dim Fs As Double
         Dim Reynolds As Double
@@ -99,13 +100,16 @@ Public Class Form1
         '============ Fs Water content in steam in [% weight] =========
         Fs = 1 + 0.0074 * W
 
-        '============= Calc fluids expansivity ============
-        Ka = (((ip - dp) * (X / 10) ^ 2) / ip)
 
-        ε_shell = κ * Ka ^ (2 / κ) / (κ - 1)
-        ε_shell *= (1 - β ^ 4) / (1 - β ^ 4 * Ka ^ (2 / κ))
-        ε_shell *= (1 - Ka ^ ((κ - 1) / κ)) / (1 - Ka)
-        ε_shell = Sqrt(ε_shell)
+        '============= Calc fluids expansivity ============
+        Kaf = (ip - dp * (X / 10) ^ 2) / ip
+        'MessageBox.Show("Kaf=" & Kaf.ToString & " ip= " & ip.ToString & " dp= " & dp.ToString & " x=" & X.ToString)
+
+        'MessageBox.Show("κ= " & κ.ToString & " Kaf= " & Kaf.ToString & " β=" & β.ToString)
+        ε1_s = (κ * Kaf ^ (2 / κ)) / (κ - 1)
+        ε2_s = (1 - β ^ 4) / (1 - β ^ 4 * Kaf ^ (2 / κ))
+        ε3_s = (1 - Kaf ^ ((κ - 1) / κ)) / (1 - Kaf)
+        ε_shell = Sqrt(ε1_s * ε2_s * ε3_s)
 
         '============ Mass flow [kg/s] ==============
         qm = 3.512407 * 10 ^ -5 * Cv * (1 / Sqrt(1 - β ^ 4))
@@ -143,7 +147,7 @@ Public Class Form1
 
         TextBox14.Text = _area_inlet.ToString("0")
         TextBox28.Text = β.ToString("0.0000")
-        TextBox30.Text = Ka.ToString("0.0000")
+        TextBox30.Text = Kaf.ToString("0.0000")
         TextBox40.Text = ε_shell.ToString("0.0000")
         TextBox31.Text = DeIn.ToString("0")             'Inlet size temp comp.
         TextBox47.Text = DeT.ToString("0")              'Throut size temp comp.
