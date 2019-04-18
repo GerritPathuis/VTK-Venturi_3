@@ -56,7 +56,7 @@ Public Class Form1
         Dim Cv As Double = 0.975    'factor rectangle venturi
         Dim ε_shell As Double       'fluids expansivity
         Dim ε1_s, ε2_s, ε3_s As Double       'fluids expansivity
-        Dim vis As Double           'Viscosity
+        Dim visco As Double         'Viscosity
         Dim Fs As Double
         Dim Reynolds As Double
         Dim W As Double = 0         'Steam_water_ontent[%]
@@ -65,7 +65,7 @@ Public Class Form1
         Dim area_throut As Double   'Throut area
         Dim v_inlet As Double       'Inlet speed
 
-        vis = NumericUpDown6.Value / 1000       'Viscositie [m.Pa.s]
+        visco = NumericUpDown6.Value / 1000     'Viscosity [m.Pa.s]
         Inlet_W = NumericUpDown12.Value         'Inlet width [mm]
         Inlet_H = NumericUpDown13.Value         'Inlet height [mm]
         Inlet_sq = Inlet_W / Inlet_H            'w/h ratio
@@ -115,8 +115,8 @@ Public Class Form1
         qm = 3.512407 * 10 ^ -5 * Cv * (1 / Sqrt(1 - β ^ 4))
         qm *= ε_shell * X * DeT ^ 2 * Fs * Sqrt(dp * _ρ)
 
-        '=========== _Reynolds ============
-        Reynolds = 1.2732 * 10 ^ 6 * qm / (vis * DeIn)
+        '=========== _Reynolds entance ============
+        Reynolds = 1.2732 * 10 ^ 6 * qm / (visco * DeIn)
 
         '========= inlet speed =============
         v_inlet = qm * _ρ / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
@@ -160,7 +160,7 @@ Public Class Form1
 
         TextBox34.Text = dp.ToString("0.000")           '[bar]
         TextBox35.Text = ip.ToString("0.000")           '[bar]
-        TextBox36.Text = vis.ToString("0.0000")         'Voscosity
+        TextBox36.Text = visco.ToString("0.0000")       'Viscosity
         TextBox37.Text = area_throut.ToString("0")
         TextBox38.Text = α_venturi.ToString
         TextBox39.Text = κ.ToString
