@@ -59,7 +59,7 @@ Public Class Form1
         Dim W As Double = 0         'Steam_water_ontent[%]
 
         Dim _area_inlet As Double    'Inlet
-        Dim area_throut As Double   'Throut
+        Dim area_throut As Double   'Throut area
         Dim v_inlet As Double       'Inlet speed
 
         vis = NumericUpDown6.Value / 1000       'Viscositie [m.Pa.s]
@@ -71,7 +71,6 @@ Public Class Form1
         small_h = NumericUpDown15.Value         'Keel height [mm]
         Throught_sq = small_w / small_h         'w/h ratio
         area_throut = small_w * small_h
-
 
         T_0 = NumericUpDown16.Value         'Reference temp
         T_line = NumericUpDown17.Value      'Line temp
@@ -164,6 +163,8 @@ Public Class Form1
         TextBox43.Text = v_inlet.ToString("0.0")    '[m3/s]
         TextBox44.Text = Inlet_sq.ToString("0.0")   '[-]
         TextBox45.Text = Throught_sq.ToString("0.0") '[-]
+        TextBox54.Text = DeIn.ToString("0")       'Diameter inlet [mm]
+        TextBox55.Text = DeT.ToString("0")     'Diameter keel [mm]
     End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click, NumericUpDown10.ValueChanged, TabPage5.Enter
