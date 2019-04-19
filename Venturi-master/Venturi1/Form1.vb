@@ -12,14 +12,14 @@ Public Class Form1
     Dim _dia_in As Double                   'Dia inlet
     Dim _dia_keel As Double                 'Dia keel
     Dim _β As Double                        'Diameter ratio 
-    Dim _dyn_visco As Double                'air
+    Dim _dyn_visco As Double                'air dynamic visco [Pa.s]
     Dim _ρ As Double                        'air density [kg/m3]
     Dim _C_classic As Double                'Discharge coefficient
     Dim _Reynolds_iso As Double             'Reynolds
     Dim _Reynolds_shell As Double           'Reynolds
     Dim _area_in, _v_inlet As Double        'Venturi data
-    Dim _p1_tap, _p2_tap, _Δp_tap As Double 'Pressures [Pa]
-    Dim _κa As Double                       'Isentropic exponent
+    Dim _p1_tap, _p2_tap, _Δp As Double     'Pressures [Pa]
+    Dim _κa As Double                       'Isentropic exponent (1.4)
     Dim _τ As Double                        'Pressure ratio
     Dim ξ_pr_loss As Double                 'Unrecovered pressure loss
     Dim zeta As Double                      'Resistance coeffi 
@@ -27,6 +27,7 @@ Public Class Form1
     Dim _qm As Double                       'Mass flowrate [kg/s]
     Dim _T1 As Double                       'Reference temperature
     Dim _T2 As Double                       'Line temperature (actual)
+    Dim α_steel As Double = 1.3 * 10 ^ -5   '[/K] steel expanion
     Dim A2a, A2b, a2c As Double
 
     '----------- directory's-----------
@@ -47,11 +48,11 @@ Public Class Form1
         Dim β As Double             'Diameter ratio
         Dim DeIn As Double          'Diameter inlet
         Dim DeT As Double           'Diameter throught
-        Dim α_venturi As Double     'Expansion coefficient
+        Dim α_steel As Double       'Expansion coefficient
 
         Dim qm As Double            'Mass flow [kg/s]
         Dim X As Double             'Normal flow scale 0-10
-        Dim ip As Double             'Inlet pressure
+        Dim ip As Double            'Inlet pressure
         Dim dp As Double            'Instrument dp
         Dim κ As Double = 1.4       'κ= Cp/Cv
         Dim Kaf As Double           'ka factor
@@ -75,22 +76,20 @@ Public Class Form1
         Throught_sq = small_w / small_h         'w/h ratio
         area_throut = small_w * small_h
 
-
         ip = _p1_tap / 10 ^ 5               'Operating pressure [Pa]->[bar]
-        dp = _Δp_tap / 10 ^ 5               'dp on instrument [Pa]->[bar]
+        dp = _Δp / 10 ^ 5               'dp on instrument [Pa]->[bar]
         qm = NumericUpDown1.Value           'Flow [kg/hr]
         X = NumericUpDown19.Value           'Normal flow scale 0-10
 
         'Thermal expansion coefficient steel 
-        α_venturi = 1.3 * 10 ^ -5           '[/K]
 
         m = (small_w * small_h) / (Inlet_W * Inlet_H)
 
         '============= Calc inlet diameter ============
-        DeIn = 1.1284 * Sqrt(Inlet_W * Inlet_H) * (1 + α_venturi * (_T2 - _T1))
+        DeIn = 1.1284 * Sqrt(Inlet_W * Inlet_H) * (1 + α_steel * (_T2 - _T1))
 
         '============= Calc throat diameter ============
-        DeT = 1.1284 * Sqrt(small_w * small_h) * (1 + α_venturi * (_T2 - _T1))
+        DeT = 1.1284 * Sqrt(small_w * small_h) * (1 + α_steel * (_T2 - _T1))
 
 
         '=============   venturi dimensional β ratio  ============
@@ -99,9 +98,10 @@ Public Class Form1
         '============ Fs Water content in steam in [% weight] =========
         Fs = 1 + 0.0074 * W
 
-        '============= Calc fluids expansivity ============
+        '=====Pressure compentation for "deellast"=====
         Kaf = (ip - dp * (X / 10) ^ 2) / ip
 
+        '============= Calc fluids expansivity ============
         ε1_s = (κ * Kaf ^ (2 / κ)) / (κ - 1)
         ε2_s = (1 - β ^ 4) / (1 - β ^ 4 * Kaf ^ (2 / κ))
         ε3_s = (1 - Kaf ^ ((κ - 1) / κ)) / (1 - Kaf)
@@ -112,7 +112,7 @@ Public Class Form1
         qm *= ε_shell * X * DeT ^ 2 * Fs * Sqrt(dp * _ρ)
 
         '=========== _Reynolds entrance ============
-        _Reynolds_shell = 1.2732 * 10 ^ 6 * qm / (_dyn_visco * DeIn * 1000)
+        _Reynolds_shell = 1273200 * qm / (_dyn_visco * DeIn * 1000)
 
         '========= inlet speed =============
         v_inlet = qm * _ρ / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
@@ -157,7 +157,7 @@ Public Class Form1
         TextBox35.Text = ip.ToString("0.000")           '[bar]
         TextBox36.Text = (_dyn_visco * 10 ^ 6).ToString("0.0")  'Viscosity
         TextBox37.Text = area_throut.ToString("0")
-        TextBox38.Text = α_venturi.ToString
+        TextBox38.Text = α_steel.ToString
         TextBox39.Text = κ.ToString
         TextBox41.Text = _Reynolds_shell.ToString("0")
 
@@ -203,14 +203,14 @@ Public Class Form1
         ComboBox1.Items.Add("   250")
         ComboBox1.SelectedIndex = 1
 
-        Double.TryParse(CType(ComboBox1.SelectedItem, String), _Δp_tap)
-        _Δp_tap *= 100                          '[mbar] --> [Pa]
+        Double.TryParse(CType(ComboBox1.SelectedItem, String), _Δp)
+        _Δp *= 100                          '[mbar] --> [Pa]
 
         '--------- calc ---------------
         _flow_m3sec = _flow_kghr / (3600 * _ρ) '[m3/s]
         _area_in = Math.PI / 4 * _dia_in ^ 2   '[m2]
         _v_inlet = _flow_m3sec / _area_in      '[m/s] keel
-        _p2_tap = _p1_tap - _Δp_tap            '[Pa]
+        _p2_tap = _p1_tap - _Δp            '[Pa]
         _τ = _p2_tap / _p1_tap                 'Pressure ratio
         _dia_keel = _β * _dia_in               '[mm]
 
@@ -265,15 +265,15 @@ Public Class Form1
         End If
 
         '-------- Unrecovered pressure loss over the complete venturi assembly----
-        'ξ_pr_loss = 0.15 * _Δp_tap
-        ξ_pr_loss = (-0.017 * _β + 0.191) * _Δp_tap   'For 7 degree divergent section
+        'ξ_pr_loss = 0.15 * _Δp
+        ξ_pr_loss = (-0.017 * _β + 0.191) * _Δp   'For 7 degree divergent section
 
         '--------- resistance coefficient venturi assembly 
         zeta = 2 * ξ_pr_loss / (_ρ * _v_inlet ^ 2)
 
         '--------- mass flow rate -----
         _qm = _C_classic / Sqrt(1 - _β ^ 4) * _ε_iso * PI / 4 * _dia_keel ^ 2
-        _qm *= Sqrt(2 * _Δp_tap * _ρ)
+        _qm *= Sqrt(2 * _Δp * _ρ)
 
         Draw_chart1()
         Present_results_iso()
@@ -285,7 +285,7 @@ Public Class Form1
         '============ ISO 5167-5 calculation ============
 
         '----- calc -------------
-        _p2_tap = _p1_tap - _Δp_tap                '[Pa]
+        _p2_tap = _p1_tap - _Δp                '[Pa]
         _τ = _p2_tap / _p1_tap                     'Pressure ratio
 
         '---------- expansie factor ISI 5167-4 Equation 2---------
@@ -315,7 +315,7 @@ Public Class Form1
 
         '------- ISO5167-1:2003, SECTION 5.2 page 8-------------
         A2b = _C_classic * _ε_iso * _βa ^ 2 / Math.Sqrt(1 - _βa ^ 4)
-        A2a = 4 * _flow_kgsec / (PI * _dia_in ^ 2 * Math.Sqrt(2 * _Δp_tap * _ρ))
+        A2a = 4 * _flow_kgsec / (PI * _dia_in ^ 2 * Math.Sqrt(2 * _Δp * _ρ))
 
         a2c = A2a - A2b
         Return (a2c)
@@ -329,7 +329,7 @@ Public Class Form1
             TextBox79.Text = _flow_kghr.ToString("0")              '[kg/m3]
             TextBox81.Text = _κa.ToString                           'Isentropic exponent
             TextBox80.Text = (_p1_tap / 100).ToString               '[Pa]->[mbar]
-            TextBox85.Text = (_Δp_tap / 100).ToString               'dp venturi [Pa]->[mbar]
+            TextBox85.Text = (_Δp / 100).ToString               'dp venturi [Pa]->[mbar]
             TextBox82.Text = (_p2_tap / 100).ToString               '[Pa]->[mbar]
 
             TextBox86.Text = _ρ.ToString("0.000")                   '[kg/m3]
@@ -459,10 +459,10 @@ Public Class Form1
             _flow_kghr = NumericUpDown1.Value           '[kg/hr]
             _κa = NumericUpDown7.Value                  'Isentropic exponent
             _ρ = NumericUpDown2.Value                   '[kg/m3]
-            _dyn_visco = Calc_dyn_vis(_T2)              'kin_visco
+            _dyn_visco = Calc_dyn_vis(_T2)              'dyn_visco
             _p1_tap = NumericUpDown11.Value * 100       '[mBar]->[pa]
-            Double.TryParse(CType(ComboBox1.SelectedItem, String), _Δp_tap)
-            _Δp_tap *= 100                              '[mbar] --> [Pa]
+            Double.TryParse(CType(ComboBox1.SelectedItem, String), _Δp)
+            _Δp *= 100                              '[mbar] --> [Pa]
             _dia_in = NumericUpDown4.Value / 1000       '[m] classis venturi inlet diameter = outlet diameter
             TextBox65.Text = _dyn_visco.ToString("0.0")
         Catch ex As Exception
@@ -558,7 +558,7 @@ Public Class Form1
             oTable.Cell(row, 3).Range.Text = "[mBar abs]"
             row += 1
             oTable.Cell(row, 1).Range.Text = "dp @ max flow"
-            oTable.Cell(row, 2).Range.Text = (_Δp_tap / 100).ToString("0.0")
+            oTable.Cell(row, 2).Range.Text = (_Δp / 100).ToString("0.0")
             oTable.Cell(row, 3).Range.Text = "[mBar]"
 
             row += 1
@@ -683,7 +683,7 @@ Public Class Form1
 
             '----------------- data for the Chart -----------------
             '--------------- see ISO 5167-4 Equation 1-------------
-            For x = 0 To _Δp_tap Step 1
+            For x = 0 To _Δp Step 1
                 y = _C_classic / Sqrt(1 - _β ^ 4)
                 y *= _ε_iso * PI / 4 * _dia_keel ^ 2 * Sqrt(2 * x * _ρ)
                 y *= 3600                               '[kg/h]
@@ -902,108 +902,83 @@ Public Class Form1
     End Function
 
 
-    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
+    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click, NumericUpDown5.ValueChanged, NumericUpDown22.ValueChanged, NumericUpDown20.ValueChanged, TabPage8.Enter
+
         Calc_pipe_bend()
     End Sub
-
+    'Shell flow metering Handbook chapter 8.1.11 page 118
     Private Sub Calc_pipe_bend()
-        Dim D_bend As Double
+        Dim ID_bend As Double
         Dim RD_ratio As Double
         Dim Radius As Double
         Dim ε_bend As Double = 1    'fluids expansivity
-        Dim α_venturi As Double     'Expansion coefficient
-        Dim qm As Double            'Mass flow [kg/s]
-        Dim X As Double             'Normal flow scale 0-10
-        Dim ip As Double             'Inlet pressure
-        Dim dp As Double            'Instrument dp
-        Dim κ As Double = 1.4       'κ= Cp/Cv
-        Dim Kaf As Double           'ka factor
-        Dim Cv As Double = 0.975    'factor rectangle venturi
-        Dim _area_inlet As Double    'Inlet
+        Dim α_steel As Double       'Expansion coefficient
+        Dim qm1, qm2 As Double      'Mass flow [kg/s]
+        Dim X_bend As Double        'Normal flow scale 0-10
+        Dim ip As Double            'inlet press in [bar]
+        Dim dp As Double            'dp in [bar]
+        Dim _Reynolds_bend As Double
+        Dim C1 As Double            'factor bend
+        Dim _area_inlet As Double   'Inlet
 
         Dim v_inlet As Double       'Inlet speed
 
         '-------- get data ------------
-
-        D_bend = NumericUpDown22.Value / 1000   'Internal diameter
+        ID_bend = NumericUpDown22.Value / 1000   'Internal diameter
         RD_ratio = NumericUpDown20.Value
-        α_venturi = 1.3 * 10 ^ -5               '[/K] Thermal expansion coefficient steel
+        α_steel = 1.3 * 10 ^ -5                 '[/K] Thermal expansion coefficient steel
 
-        qm = NumericUpDown1.Value           'Flow [kg/hr]
-        X = NumericUpDown19.Value           'Normal flow scale 0-10
+        X_bend = NumericUpDown5.Value           'Normal flow scale 0-10
+
 
         '-------- calc Diameter and Radius-------------
-        D_bend = D_bend * (1 + α_venturi * (_T2 - _T1)) 'Calc termal expansion
-        Radius = D_bend * RD_ratio
+        ID_bend = ID_bend * (1 + α_steel * (_T2 - _T1)) 'Calc termal expansion
+        Radius = ID_bend * RD_ratio
+        _area_inlet = PI / 4 * ID_bend
 
+        ip = _p1_tap / 10 ^ 5           'Operating pressure [Pa]->[bar]
+        dp = _Δp / 10 ^ 5               'dp on instrument [Pa]->[bar]
 
-        _area_inlet = PI / 4 * D_bend
+        '========= Calc qm1 [kg/s] =============
+        qm1 = 2.46 * 10 ^ -5 * X_bend * ID_bend ^ 2 * Sqrt(ip * dp)
 
-
-        ip = _p1_tap / 10 ^ 5               'Operating pressure [Pa]->[bar]
-        dp = _Δp_tap / 10 ^ 5               'dp on instrument [Pa]->[bar]
-
-
-
-
-
-        '============= Calc inlet diameter ============
-
-        '========= inlet speed =============
-        'v_inlet = qm * _ρ / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
-
+        TextBox84.Text = dp.ToString
 
         '=========== _Reynolds entrance ============
-        ' _Reynolds_shell = 1.2732 * 10 ^ 6 * qm / (_dyn_visco * DeIn)
+        _Reynolds_bend = 1273200 * qm1 / (_dyn_visco * ID_bend)
 
-        '============= Calc fluids expansivity ============
-        Kaf = (ip - dp * (X / 10) ^ 2) / ip
+        '=========== Calc C1  ============
+        Dim q As Double = Sqrt(Radius / (2 * ID_bend))
 
+        C1 = q - 6.5 * q / Sqrt(_Reynolds_bend)
 
-        '============ Mass flow [kg/s] ==============
-        'qm = 3.512407 * 10 ^ -5 * Cv * (1 / Sqrt(1 - β ^ 4))
-        ' qm *= ε_shell * X * DeT ^ 2 * Fs * Sqrt(dp * _ρ)
-
-
-
-
-        '============ Check throught dimensions ratio =============
-        'If Throught_sq < 0.67 Or Throught_sq > 1.5 Then
-        '    TextBox45.BackColor = Color.Red
-        'Else
-        '    TextBox45.BackColor = Color.LightGreen
-        'End If
+        '========= Calc qm2 [kg/s] =============
+        qm2 = 2.46 * 10 ^ -5 * C1 * ID_bend ^ 2 * Sqrt(ip * dp)
 
         '============ Check Reynolds =============
-        'If _Reynolds_shell < 2.0 * 10 ^ 5 Or _Reynolds_shell > 2.0 * 10 ^ 7 Then
-        '    TextBox41.BackColor = Color.Red
-        'Else
-        '    TextBox41.BackColor = Color.LightGreen
-        'End If
 
-        'TextBox31.BackColor = CType(IIf(DeIn <= 1200, Color.LightGreen, Color.Aqua), Color)
-
-        'TextBox14.Text = _area_inlet.ToString("0")
-        'TextBox28.Text = β.ToString("0.0000")
-        'TextBox30.Text = Kaf.ToString("0.0000")
-        'TextBox40.Text = ε_bend.ToString("0.0000")
-        'TextBox31.Text = DeIn.ToString("0")             'Inlet size temp comp.
-
-        'TextBox32.Text = _ρ.ToString("0.0000")          'Density
+        '=========== present ==========
+        TextBox61.Text = _ρ.ToString("0.00")                '[kg/m3] Density
+        TextBox58.Text = (_dyn_visco * 10 ^ 6).ToString("0.00")    '[mPas]
+        TextBox56.Text = _κa.ToString("0.00")
+        TextBox66.Text = _T1.ToString("0")                  '[c]
+        TextBox75.Text = _T2.ToString("0")                  '[c]
+        TextBox57.Text = α_steel.ToString()
+        TextBox60.Text = (dp * 10 ^ 3).ToString()           '[mbar]
+        TextBox59.Text = (ip * 10 ^ 3).ToString()           '[mbar]
+        TextBox64.Text = (Radius * 10 ^ 3).ToString("0")    '[m]
+        TextBox72.Text = (ID_bend * 10 ^ 3).ToString("0")   '[m]
+        TextBox71.Text = _area_inlet.ToString("0.00")       '[m2] pipe area
+        TextBox74.Text = qm1.ToString("0.00")               'flow [kg/s]
+        TextBox69.Text = _Reynolds_bend.ToString("0")       '[Reynolds] 
+        TextBox73.Text = C1.ToString("0.0")                 '[-] 
+        TextBox70.Text = ε_bend.ToString("0.0")             '[-] 
 
         'TextBox33.Text = qm.ToString("0.00")            '[kg/s]
         'TextBox42.Text = (qm * 3600).ToString("0")      '[kg/hr]
         'TextBox50.Text = (qm * _ρ).ToString("0.00")     '[m3/s]
         'TextBox49.Text = (qm * 3600 * _ρ).ToString("0") '[m3/hr]
 
-        'TextBox34.Text = dp.ToString("0.000")           '[bar]
-        'TextBox35.Text = ip.ToString("0.000")           '[bar]
-        'TextBox36.Text = _dyn_visco.ToString("0.0000")       'Viscosity
-        'TextBox37.Text = area_throut.ToString("0")
-        'TextBox38.Text = α_venturi.ToString
-        'TextBox39.Text = κ.ToString
-        'TextBox41.Text = _Reynolds_shell.ToString("0")
-        'TextBox43.Text = v_inlet.ToString("0.0")    '[m3/s]
 
     End Sub
 
