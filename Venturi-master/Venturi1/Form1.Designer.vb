@@ -190,6 +190,8 @@ Partial Class Form1
         Me.Label75 = New System.Windows.Forms.Label()
         Me.TextBox29 = New System.Windows.Forms.TextBox()
         Me.GroupBox8 = New System.Windows.Forms.GroupBox()
+        Me.Label122 = New System.Windows.Forms.Label()
+        Me.TextBox89 = New System.Windows.Forms.TextBox()
         Me.TextBox78 = New System.Windows.Forms.TextBox()
         Me.TextBox77 = New System.Windows.Forms.TextBox()
         Me.Label97 = New System.Windows.Forms.Label()
@@ -282,6 +284,8 @@ Partial Class Form1
         Me.Label109 = New System.Windows.Forms.Label()
         Me.Label112 = New System.Windows.Forms.Label()
         Me.GroupBox9 = New System.Windows.Forms.GroupBox()
+        Me.Label123 = New System.Windows.Forms.Label()
+        Me.TextBox90 = New System.Windows.Forms.TextBox()
         Me.TextBox75 = New System.Windows.Forms.TextBox()
         Me.TextBox66 = New System.Windows.Forms.TextBox()
         Me.Label86 = New System.Windows.Forms.Label()
@@ -302,10 +306,6 @@ Partial Class Form1
         Me.Label94 = New System.Windows.Forms.Label()
         Me.PictureBox6 = New System.Windows.Forms.PictureBox()
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-        Me.Label122 = New System.Windows.Forms.Label()
-        Me.TextBox89 = New System.Windows.Forms.TextBox()
-        Me.Label123 = New System.Windows.Forms.Label()
-        Me.TextBox90 = New System.Windows.Forms.TextBox()
         Me.TabControl1.SuspendLayout()
         Me.TabPage9.SuspendLayout()
         Me.GroupBox12.SuspendLayout()
@@ -387,7 +387,7 @@ Partial Class Form1
         Me.TabPage9.Location = New System.Drawing.Point(4, 22)
         Me.TabPage9.Name = "TabPage9"
         Me.TabPage9.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage9.Size = New System.Drawing.Size(921, 692)
+        Me.TabPage9.Size = New System.Drawing.Size(921, 700)
         Me.TabPage9.TabIndex = 8
         Me.TabPage9.Text = "Process data new"
         Me.TabPage9.UseVisualStyleBackColor = True
@@ -1481,7 +1481,7 @@ Partial Class Form1
         Me.TabPage4.Location = New System.Drawing.Point(4, 22)
         Me.TabPage4.Name = "TabPage4"
         Me.TabPage4.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage4.Size = New System.Drawing.Size(921, 692)
+        Me.TabPage4.Size = New System.Drawing.Size(921, 700)
         Me.TabPage4.TabIndex = 3
         Me.TabPage4.Text = "Flow computation"
         Me.TabPage4.UseVisualStyleBackColor = True
@@ -1509,7 +1509,7 @@ Partial Class Form1
         Series4.Legend = "Legend1"
         Series4.Name = "Series1"
         Me.Chart2.Series.Add(Series4)
-        Me.Chart2.Size = New System.Drawing.Size(915, 686)
+        Me.Chart2.Size = New System.Drawing.Size(915, 694)
         Me.Chart2.TabIndex = 0
         Me.Chart2.Text = "Chart2"
         '
@@ -1519,7 +1519,7 @@ Partial Class Form1
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(921, 692)
+        Me.TabPage2.Size = New System.Drawing.Size(921, 700)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "Achtergrond"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -1540,7 +1540,7 @@ Partial Class Form1
         Me.TabPage3.Location = New System.Drawing.Point(4, 22)
         Me.TabPage3.Name = "TabPage3"
         Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage3.Size = New System.Drawing.Size(921, 692)
+        Me.TabPage3.Size = New System.Drawing.Size(921, 700)
         Me.TabPage3.TabIndex = 2
         Me.TabPage3.Text = "Classis Venturi Dimensions"
         Me.TabPage3.UseVisualStyleBackColor = True
@@ -1928,7 +1928,7 @@ Partial Class Form1
         Me.PictureBox1.InitialImage = CType(resources.GetObject("PictureBox1.InitialImage"), System.Drawing.Image)
         Me.PictureBox1.Location = New System.Drawing.Point(433, 3)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(485, 686)
+        Me.PictureBox1.Size = New System.Drawing.Size(485, 694)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.PictureBox1.TabIndex = 0
         Me.PictureBox1.TabStop = False
@@ -1942,7 +1942,7 @@ Partial Class Form1
         Me.TabPage5.Location = New System.Drawing.Point(4, 22)
         Me.TabPage5.Name = "TabPage5"
         Me.TabPage5.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage5.Size = New System.Drawing.Size(921, 692)
+        Me.TabPage5.Size = New System.Drawing.Size(921, 700)
         Me.TabPage5.TabIndex = 4
         Me.TabPage5.Text = "Dynamic Viscosity Air"
         Me.TabPage5.UseVisualStyleBackColor = True
@@ -2037,7 +2037,7 @@ Partial Class Form1
         Me.TabPage6.Location = New System.Drawing.Point(4, 22)
         Me.TabPage6.Name = "TabPage6"
         Me.TabPage6.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage6.Size = New System.Drawing.Size(921, 692)
+        Me.TabPage6.Size = New System.Drawing.Size(921, 700)
         Me.TabPage6.TabIndex = 5
         Me.TabPage6.Text = "Shell dwrg S24.002-G"
         Me.TabPage6.UseVisualStyleBackColor = True
@@ -2048,7 +2048,7 @@ Partial Class Form1
         Me.PictureBox4.Image = CType(resources.GetObject("PictureBox4.Image"), System.Drawing.Image)
         Me.PictureBox4.Location = New System.Drawing.Point(3, 3)
         Me.PictureBox4.Name = "PictureBox4"
-        Me.PictureBox4.Size = New System.Drawing.Size(915, 686)
+        Me.PictureBox4.Size = New System.Drawing.Size(915, 694)
         Me.PictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.PictureBox4.TabIndex = 0
         Me.PictureBox4.TabStop = False
@@ -2145,6 +2145,26 @@ Partial Class Form1
         Me.GroupBox8.TabIndex = 4
         Me.GroupBox8.TabStop = False
         Me.GroupBox8.Text = "Air data"
+        '
+        'Label122
+        '
+        Me.Label122.AutoSize = True
+        Me.Label122.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label122.Location = New System.Drawing.Point(13, 19)
+        Me.Label122.Name = "Label122"
+        Me.Label122.Size = New System.Drawing.Size(185, 16)
+        Me.Label122.TabIndex = 111
+        Me.Label122.Text = "Requested mass flow [kg/m3]"
+        '
+        'TextBox89
+        '
+        Me.TextBox89.Enabled = False
+        Me.TextBox89.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TextBox89.Location = New System.Drawing.Point(278, 14)
+        Me.TextBox89.Name = "TextBox89"
+        Me.TextBox89.Size = New System.Drawing.Size(71, 22)
+        Me.TextBox89.TabIndex = 110
+        Me.TextBox89.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'TextBox78
         '
@@ -2254,7 +2274,7 @@ Partial Class Form1
         Me.NumericUpDown19.InterceptArrowKeys = False
         Me.NumericUpDown19.Location = New System.Drawing.Point(278, 234)
         Me.NumericUpDown19.Maximum = New Decimal(New Integer() {10, 0, 0, 0})
-        Me.NumericUpDown19.Minimum = New Decimal(New Integer() {3, 0, 0, 0})
+        Me.NumericUpDown19.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
         Me.NumericUpDown19.Name = "NumericUpDown19"
         Me.NumericUpDown19.Size = New System.Drawing.Size(71, 22)
         Me.NumericUpDown19.TabIndex = 99
@@ -2891,9 +2911,9 @@ Partial Class Form1
         '
         Me.TextBox74.Enabled = False
         Me.TextBox74.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TextBox74.Location = New System.Drawing.Point(139, 153)
+        Me.TextBox74.Location = New System.Drawing.Point(264, 153)
         Me.TextBox74.Name = "TextBox74"
-        Me.TextBox74.Size = New System.Drawing.Size(196, 22)
+        Me.TextBox74.Size = New System.Drawing.Size(71, 22)
         Me.TextBox74.TabIndex = 112
         Me.TextBox74.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
@@ -3189,6 +3209,26 @@ Partial Class Form1
         Me.GroupBox9.TabStop = False
         Me.GroupBox9.Text = "Air data"
         '
+        'Label123
+        '
+        Me.Label123.AutoSize = True
+        Me.Label123.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label123.Location = New System.Drawing.Point(13, 23)
+        Me.Label123.Name = "Label123"
+        Me.Label123.Size = New System.Drawing.Size(185, 16)
+        Me.Label123.TabIndex = 109
+        Me.Label123.Text = "Requested mass flow [kg/m3]"
+        '
+        'TextBox90
+        '
+        Me.TextBox90.Enabled = False
+        Me.TextBox90.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TextBox90.Location = New System.Drawing.Point(264, 19)
+        Me.TextBox90.Name = "TextBox90"
+        Me.TextBox90.Size = New System.Drawing.Size(71, 22)
+        Me.TextBox90.TabIndex = 108
+        Me.TextBox90.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
+        '
         'TextBox75
         '
         Me.TextBox75.Enabled = False
@@ -3277,7 +3317,7 @@ Partial Class Form1
         Me.NumericUpDown5.InterceptArrowKeys = False
         Me.NumericUpDown5.Location = New System.Drawing.Point(264, 234)
         Me.NumericUpDown5.Maximum = New Decimal(New Integer() {10, 0, 0, 0})
-        Me.NumericUpDown5.Minimum = New Decimal(New Integer() {3, 0, 0, 0})
+        Me.NumericUpDown5.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
         Me.NumericUpDown5.Name = "NumericUpDown5"
         Me.NumericUpDown5.Size = New System.Drawing.Size(71, 22)
         Me.NumericUpDown5.TabIndex = 99
@@ -3387,46 +3427,6 @@ Partial Class Form1
         'OpenFileDialog1
         '
         Me.OpenFileDialog1.FileName = "OpenFileDialog1"
-        '
-        'Label122
-        '
-        Me.Label122.AutoSize = True
-        Me.Label122.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label122.Location = New System.Drawing.Point(13, 19)
-        Me.Label122.Name = "Label122"
-        Me.Label122.Size = New System.Drawing.Size(185, 16)
-        Me.Label122.TabIndex = 111
-        Me.Label122.Text = "Requested mass flow [kg/m3]"
-        '
-        'TextBox89
-        '
-        Me.TextBox89.Enabled = False
-        Me.TextBox89.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TextBox89.Location = New System.Drawing.Point(278, 14)
-        Me.TextBox89.Name = "TextBox89"
-        Me.TextBox89.Size = New System.Drawing.Size(71, 22)
-        Me.TextBox89.TabIndex = 110
-        Me.TextBox89.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        '
-        'Label123
-        '
-        Me.Label123.AutoSize = True
-        Me.Label123.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label123.Location = New System.Drawing.Point(13, 23)
-        Me.Label123.Name = "Label123"
-        Me.Label123.Size = New System.Drawing.Size(185, 16)
-        Me.Label123.TabIndex = 109
-        Me.Label123.Text = "Requested mass flow [kg/m3]"
-        '
-        'TextBox90
-        '
-        Me.TextBox90.Enabled = False
-        Me.TextBox90.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TextBox90.Location = New System.Drawing.Point(264, 19)
-        Me.TextBox90.Name = "TextBox90"
-        Me.TextBox90.Size = New System.Drawing.Size(71, 22)
-        Me.TextBox90.TabIndex = 108
-        Me.TextBox90.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Form1
         '

@@ -78,8 +78,7 @@ Public Class Form1
         area_throut = small_w * small_h
 
         ip = _p1_tap / 10 ^ 5               'Operating pressure [Pa]->[bar]
-        dp = _Δp / 10 ^ 5               'dp on instrument [Pa]->[bar]
-        qm = NumericUpDown1.Value           'Flow [kg/hr]
+        dp = _Δp / 10 ^ 5                   'dp on instrument [Pa]->[bar]
         X = NumericUpDown19.Value           'Normal flow scale 0-10
 
         'Thermal expansion coefficient steel 
@@ -915,8 +914,10 @@ Public Class Form1
         Calc_pipe_bend()
     End Sub
     'Shell flow metering Handbook chapter 8.1.11 page 118
+    'http://www.nivelco.com.ua/documents/technical%20publications%20docs/Instrument-Engineers-Handbook-Fourth-Edition-Volume-One-Process-Measurement-and-Analysis.pdf
+    'page 190
     Private Sub Calc_pipe_bend()
-        Dim ID_bend As Double
+        Dim Bore As Double
         Dim RD_ratio As Double
         Dim Radius As Double
         Dim ε_bend As Double = 1    'fluids expansivity
@@ -934,35 +935,38 @@ Public Class Form1
         Dim v_inlet As Double       'Inlet speed [m2]
 
         '-------- get data ------------
-        ID_bend = NumericUpDown22.Value / 1000  'Internal diameter [m]
+        Bore = NumericUpDown22.Value        'Internal diameter [mm]
         RD_ratio = NumericUpDown20.Value
-        α_steel = 1.3 * 10 ^ -5                 '[/K] Thermal expansion coefficient steel
+        α_steel = 1.3 * 10 ^ -5             '[/K] Thermal expansion coefficient steel
 
-        X_bend = NumericUpDown5.Value           'Normal flow scale 0-10
+        X_bend = NumericUpDown5.Value       'Normal flow scale 0-10
 
         '-------- calc Diameter and Radius-------------
-        ID_bend = ID_bend * (1 + α_steel * (_T2 - _T1)) 'Calc termal expansion
-        Radius = ID_bend * RD_ratio
-        _area_inlet = PI / 4 * ID_bend  '[[m2]
+        Bore = Bore * (1 + α_steel * (_T2 - _T1)) 'Calc termal expansion
+        Radius = Bore * RD_ratio
+        _area_inlet = PI / 4 * (Bore / 1000)  '[[m2]
 
         ip = _p1_tap / 10 ^ 5           'Operating pressure [Pa]->[bar]
         dp = _Δp / 10 ^ 5               'dp on instrument [Pa]->[bar]
 
         '========= Calc qm1 [kg/s] =============
-        qm1 = 2.46 * 10 ^ -5 * X_bend * ID_bend ^ 2 * Sqrt(ip * dp)
+        qm1 = 2.46 * 10 ^ -5 * X_bend * Bore ^ 2 * Sqrt(dp * _ρ)
+        'qm1 = 2.46 * 10 ^ -5 * X_bend * Bore ^ 2 * Sqrt(2*dp * _ρ)
 
         TextBox84.Text = dp.ToString
 
         '=========== _Reynolds entrance ============
-        _Reynolds_bend = 1273200 * qm1 / (_dyn_visco * ID_bend)
+        _Reynolds_bend = 1273200 * qm1 / (_dyn_visco * Bore)
 
         '=========== Calc C1  ============
-        Dim q As Double = Sqrt(Radius / (2 * ID_bend))
+        Dim pp As Double = Sqrt(Radius / (2 * Bore))
 
-        C1 = q - 6.5 * q / Sqrt(_Reynolds_bend)
+        C1 = pp - 6.5 * pp / Sqrt(_Reynolds_bend)
 
         '========= Calc qm2 [kg/s] =============
-        qm2 = 2.46 * 10 ^ -5 * C1 * ID_bend ^ 2 * Sqrt(ip * dp)
+        ' ************** CHECK **************
+        qm2 = 2.46 * 10 ^ -5 * C1 * Bore ^ 2 * Sqrt(dp * _ρ)
+        ' qm2 = 2.46 * 10 ^ -5 * C1 * Bore ^ 2 * Sqrt(2* dp * _ρ)
 
         '============ speed inlet =============
         qv2sec = qm2 / _ρ
@@ -970,6 +974,12 @@ Public Class Form1
         v_inlet = qv2sec / _area_inlet
 
         '============ Check Reynolds =============
+        If _Reynolds_shell < 1.0 * 10 ^ 4 Then
+            TextBox69.BackColor = Color.Red
+        Else
+            TextBox69.BackColor = Color.LightGreen
+        End If
+
 
         '=========== present ==========
         TextBox90.Text = _flow_kghr.ToString("0")           'Requested mass flow inlet[kg/m3] 
@@ -982,18 +992,18 @@ Public Class Form1
         TextBox60.Text = (dp * 10 ^ 3).ToString()           '[mbar]
         TextBox59.Text = (ip * 10 ^ 3).ToString()           '[mbar]
         TextBox64.Text = (Radius * 10 ^ 3).ToString("0")    '[m]
-        TextBox72.Text = (ID_bend * 10 ^ 3).ToString("0")   '[m]
+        TextBox72.Text = (Bore * 10 ^ 3).ToString("0")   '[m]
         TextBox71.Text = _area_inlet.ToString("0.00")       '[m2] pipe area
-        TextBox74.Text = qm1.ToString            'flow [kg/s]
+        TextBox74.Text = qm1.ToString("0.00")               'flow [kg/s]
         TextBox69.Text = _Reynolds_bend.ToString("0")       '[Reynolds] 
-        TextBox73.Text = C1.ToString("0.000")                '[-] 
+        TextBox73.Text = C1.ToString("0.000")               '[-] 
         TextBox70.Text = ε_bend.ToString("0.0")             '[-] 
 
-        TextBox76.Text = qm2.ToString("0.00")            '[kg/s]
-        TextBox68.Text = (qm2 * 3600).ToString("0")      '[kg/hr]
-        TextBox63.Text = qv2sec.ToString("0.00")        '[m3/s]
-        TextBox62.Text = qv2hour.ToString("0")          '[m3/hr]
-        TextBox67.Text = v_inlet.ToString("0")          '[m3/hr]
+        TextBox76.Text = qm2.ToString("0.00")               '[kg/s]
+        TextBox68.Text = (qm2 * 3600).ToString("0")         '[kg/hr]
+        TextBox63.Text = qv2sec.ToString("0.00")            '[m3/s]
+        TextBox62.Text = qv2hour.ToString("0")              '[m3/hr]
+        TextBox67.Text = v_inlet.ToString("0.00")           '[m/s]
 
     End Sub
 
