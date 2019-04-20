@@ -6,9 +6,9 @@ Imports System.Threading
 Imports Word = Microsoft.Office.Interop.Word
 
 Public Class Form1
-    Dim _flow_kghr As Double                'Flow [kg/hr]
-    Dim _flow_kgsec As Double               'Flow [kg/s]
-    Dim _flow_m3sec As Double               'Flow [m3/s]
+    Dim _flow_kghr As Double                'Requested Flow inlet [kg/hr]
+    Dim _flow_kgsec As Double               'Flow inlet [kg/s]
+    Dim _flow_m3sec As Double               'Flow inlet [m3/s]
     Dim _dia_in As Double                   'Dia inlet
     Dim _dia_keel As Double                 'Dia keel
     Dim _β As Double                        'Diameter ratio 
@@ -51,6 +51,7 @@ Public Class Form1
         Dim α_steel As Double       'Expansion coefficient
 
         Dim qm As Double            'Mass flow [kg/s]
+        Dim qv As Double            'Mass flow [m3/s]
         Dim X As Double             'Normal flow scale 0-10
         Dim ip As Double            'Inlet pressure
         Dim dp As Double            'Instrument dp
@@ -115,7 +116,8 @@ Public Class Form1
         _Reynolds_shell = 1273200 * qm / (_dyn_visco * DeIn * 1000)
 
         '========= inlet speed =============
-        v_inlet = qm * _ρ / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
+        qv = qm / _ρ                                 '[m3/hr]
+        v_inlet = qv / (Inlet_W * Inlet_H / 10 ^ 6)  '[m/s]
 
         '============ Check inlet dimensions ratio =============
         If Inlet_sq < 0.67 Or Inlet_sq > 1.5 Then
@@ -140,6 +142,7 @@ Public Class Form1
 
         TextBox31.BackColor = CType(IIf(DeIn <= 1200, Color.LightGreen, Color.Aqua), Color)
 
+        TextBox89.Text = _flow_kghr.ToString("0")       'Requested mass flow inlet[kg/m3] 
         TextBox14.Text = _area_inlet.ToString("0")
         TextBox28.Text = β.ToString("0.0000")
         TextBox30.Text = Kaf.ToString("0.0000")
@@ -150,8 +153,8 @@ Public Class Form1
 
         TextBox33.Text = qm.ToString("0.00")            '[kg/s]
         TextBox42.Text = (qm * 3600).ToString("0")      '[kg/hr]
-        TextBox50.Text = (qm * _ρ).ToString("0.00")     '[m3/s]
-        TextBox49.Text = (qm * 3600 * _ρ).ToString("0") '[m3/hr]
+        TextBox50.Text = qv.ToString("0.00")            '[m3/s]
+        TextBox49.Text = (qv * 3600).ToString("0")      '[m3/hr]
 
         TextBox34.Text = dp.ToString("0.000")           '[bar]
         TextBox35.Text = ip.ToString("0.000")           '[bar]
@@ -184,7 +187,7 @@ Public Class Form1
         "chapter 6.2.11 page 99, 238 And 239"
 
         '------------- Initial values----------------------
-        _flow_kghr = 30000                  '[kg/m3]
+        _flow_kghr = NumericUpDown1.Value   '[kg/m3]
         _flow_kgsec = _flow_kghr / 3600     '[kg/sec]
         _ρ = 1.2                            '[kg/m3]
         _κa = 1.4                           'Isentropic exponent
@@ -218,7 +221,7 @@ Public Class Form1
         Present_results_iso()
         Calc_venturi_iso()
     End Sub
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click, NumericUpDown4.ValueChanged
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click, NumericUpDown4.ValueChanged, TabPage1.Enter
         Calc_venturi_iso()
     End Sub
 
@@ -301,16 +304,12 @@ Public Class Form1
         _ε_iso = Math.Sqrt(ε1 * ε2 * ε3)            'Expansibility factor
 
         '------------- iteratie-------------------
-        _flow_kghr = NumericUpDown1.Value           '[kg/h] inlet
-        _flow_kgsec = _flow_kghr / 3600             '[kg/sec] inlet
-        _flow_m3sec = _flow_kgsec / _ρ              '[m3/s] inlet
 
         _area_in = Math.PI / 4 * _dia_in ^ 2        '[m2]
         _v_inlet = _flow_m3sec / _area_in           '[m/s] inlet
 
         _Reynolds_iso = Reynolds(_v_inlet, _dia_in, _ρ, _dyn_visco)
 
-        'Label118.Text = _dyn_visco.ToString
 
 
         '------- ISO5167-1:2003, SECTION 5.2 page 8-------------
@@ -326,10 +325,10 @@ Public Class Form1
 
     Private Sub Present_results_iso()
         Try
-            TextBox79.Text = _flow_kghr.ToString("0")              '[kg/m3]
+            TextBox79.Text = _flow_kghr.ToString("0")               '[kg/m3]
             TextBox81.Text = _κa.ToString                           'Isentropic exponent
             TextBox80.Text = (_p1_tap / 100).ToString               '[Pa]->[mbar]
-            TextBox85.Text = (_Δp / 100).ToString               'dp venturi [Pa]->[mbar]
+            TextBox85.Text = (_Δp / 100).ToString                   'dp venturi [Pa]->[mbar]
             TextBox82.Text = (_p2_tap / 100).ToString               '[Pa]->[mbar]
 
             TextBox86.Text = _ρ.ToString("0.000")                   '[kg/m3]
@@ -344,14 +343,17 @@ Public Class Form1
             TextBox13.Text = Math.Round(_p2_tap / 100, 1).ToString      '[Pa]->[mBar]
             TextBox12.Text = _τ.ToString("0.0000")
             TextBox15.Text = (_dia_in * 1000).ToString("0")             'Diameter inlet [m]->[mm]
-            TextBox16.Text = _flow_m3sec.ToString("0.000")              'Flow [m3/s]
-            TextBox51.Text = (_flow_m3sec * 3600).ToString("0")         'Flow [m3/h]
+
+            TextBox88.Text = _flow_m3sec.ToString("0.00")               'Volume Flow [m3/s]
+            TextBox87.Text = (_flow_m3sec * 3600).ToString("0")         'Volume Flow [m3/h]
+
             TextBox17.Text = (_dia_keel * 1000).ToString("0")           'Diameter keel
             TextBox23.Text = (ξ_pr_loss / 100).ToString("0.00")         'Unrecovered pressure loss [Pa]->[mBar]
             TextBox26.Text = zeta.ToString("0.00")                      'Resistance coeffi venturi assembly
             TextBox48.Text = _flow_kgsec.ToString("0.00")
             TextBox54.Text = _qm.ToString("0.00")                       'Mass flow rate [kg/s]
             TextBox55.Text = (_qm * 3600).ToString("0")                 'Mass flow rate [kg/h]
+
 
             '------- _β check --------------
             If _β < 0.4 Or _β > 0.7 Then
@@ -462,9 +464,17 @@ Public Class Form1
             _dyn_visco = Calc_dyn_vis(_T2)              'dyn_visco
             _p1_tap = NumericUpDown11.Value * 100       '[mBar]->[pa]
             Double.TryParse(CType(ComboBox1.SelectedItem, String), _Δp)
-            _Δp *= 100                              '[mbar] --> [Pa]
+            _Δp *= 100                                  '[mbar] --> [Pa]
             _dia_in = NumericUpDown4.Value / 1000       '[m] classis venturi inlet diameter = outlet diameter
             TextBox65.Text = _dyn_visco.ToString("0.0")
+
+            _flow_kghr = NumericUpDown1.Value           '[kg/h] inlet
+            _flow_kgsec = _flow_kghr / 3600             '[kg/sec] inlet
+            _flow_m3sec = _flow_kgsec / _ρ              '[m3/s] inlet
+
+            TextBox48.Text = _flow_kgsec.ToString("0.00")      'Massa flow [kg/s]
+            TextBox16.Text = _flow_m3sec.ToString("0.00")      'Volume Flow [m3/s]
+            TextBox51.Text = (_flow_m3sec * 3600).ToString("0") 'Volume Flow [m3/h]
         Catch ex As Exception
             MessageBox.Show(ex.Message & "Error 254")  ' Show the exception's message.
         End Try
@@ -706,7 +716,7 @@ Public Class Form1
         Return (_dyn_visco * 10 ^ -6)
     End Function
 
-    Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click, NumericUpDown7.ValueChanged, NumericUpDown2.ValueChanged, NumericUpDown17.ValueChanged, NumericUpDown16.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown1.ValueChanged, ComboBox1.SelectedIndexChanged
+    Private Sub Button10_Click(sender As Object, e As EventArgs) Handles Button10.Click, NumericUpDown7.ValueChanged, NumericUpDown2.ValueChanged, NumericUpDown17.ValueChanged, NumericUpDown16.ValueChanged, NumericUpDown11.ValueChanged, NumericUpDown1.ValueChanged, ComboBox1.SelectedIndexChanged, TabPage9.Enter
         Get_data_from_screen()
     End Sub
     'Save control settings and case_x_conditions to file
@@ -901,9 +911,7 @@ Public Class Form1
         Return list
     End Function
 
-
     Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click, NumericUpDown5.ValueChanged, NumericUpDown22.ValueChanged, NumericUpDown20.ValueChanged, TabPage8.Enter
-
         Calc_pipe_bend()
     End Sub
     'Shell flow metering Handbook chapter 8.1.11 page 118
@@ -921,20 +929,21 @@ Public Class Form1
         Dim C1 As Double            'factor bend
         Dim _area_inlet As Double   'Inlet
 
-        Dim v_inlet As Double       'Inlet speed
+        Dim qv2sec As Double        'inlet flow [m3/s]
+        Dim qv2hour As Double       'inlet flow [m3/hour]
+        Dim v_inlet As Double       'Inlet speed [m2]
 
         '-------- get data ------------
-        ID_bend = NumericUpDown22.Value / 1000   'Internal diameter
+        ID_bend = NumericUpDown22.Value / 1000  'Internal diameter [m]
         RD_ratio = NumericUpDown20.Value
         α_steel = 1.3 * 10 ^ -5                 '[/K] Thermal expansion coefficient steel
 
         X_bend = NumericUpDown5.Value           'Normal flow scale 0-10
 
-
         '-------- calc Diameter and Radius-------------
         ID_bend = ID_bend * (1 + α_steel * (_T2 - _T1)) 'Calc termal expansion
         Radius = ID_bend * RD_ratio
-        _area_inlet = PI / 4 * ID_bend
+        _area_inlet = PI / 4 * ID_bend  '[[m2]
 
         ip = _p1_tap / 10 ^ 5           'Operating pressure [Pa]->[bar]
         dp = _Δp / 10 ^ 5               'dp on instrument [Pa]->[bar]
@@ -955,9 +964,15 @@ Public Class Form1
         '========= Calc qm2 [kg/s] =============
         qm2 = 2.46 * 10 ^ -5 * C1 * ID_bend ^ 2 * Sqrt(ip * dp)
 
+        '============ speed inlet =============
+        qv2sec = qm2 / _ρ
+        qv2hour = qv2sec * 3600
+        v_inlet = qv2sec / _area_inlet
+
         '============ Check Reynolds =============
 
         '=========== present ==========
+        TextBox90.Text = _flow_kghr.ToString("0")           'Requested mass flow inlet[kg/m3] 
         TextBox61.Text = _ρ.ToString("0.00")                '[kg/m3] Density
         TextBox58.Text = (_dyn_visco * 10 ^ 6).ToString("0.00")    '[mPas]
         TextBox56.Text = _κa.ToString("0.00")
@@ -969,16 +984,16 @@ Public Class Form1
         TextBox64.Text = (Radius * 10 ^ 3).ToString("0")    '[m]
         TextBox72.Text = (ID_bend * 10 ^ 3).ToString("0")   '[m]
         TextBox71.Text = _area_inlet.ToString("0.00")       '[m2] pipe area
-        TextBox74.Text = qm1.ToString("0.00")               'flow [kg/s]
+        TextBox74.Text = qm1.ToString            'flow [kg/s]
         TextBox69.Text = _Reynolds_bend.ToString("0")       '[Reynolds] 
-        TextBox73.Text = C1.ToString("0.0")                 '[-] 
+        TextBox73.Text = C1.ToString("0.000")                '[-] 
         TextBox70.Text = ε_bend.ToString("0.0")             '[-] 
 
-        'TextBox33.Text = qm.ToString("0.00")            '[kg/s]
-        'TextBox42.Text = (qm * 3600).ToString("0")      '[kg/hr]
-        'TextBox50.Text = (qm * _ρ).ToString("0.00")     '[m3/s]
-        'TextBox49.Text = (qm * 3600 * _ρ).ToString("0") '[m3/hr]
-
+        TextBox76.Text = qm2.ToString("0.00")            '[kg/s]
+        TextBox68.Text = (qm2 * 3600).ToString("0")      '[kg/hr]
+        TextBox63.Text = qv2sec.ToString("0.00")        '[m3/s]
+        TextBox62.Text = qv2hour.ToString("0")          '[m3/hr]
+        TextBox67.Text = v_inlet.ToString("0")          '[m3/hr]
 
     End Sub
 
