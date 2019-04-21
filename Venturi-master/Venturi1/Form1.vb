@@ -961,7 +961,7 @@ Public Class Form1
         '=========== Calc C1  ============
         Dim pp As Double = Sqrt(Radius / (2 * Bore))
 
-        C1 = pp - 6.5 * pp / Sqrt(_Reynolds_bend)
+        C1 = pp + 6.5 * pp / Sqrt(_Reynolds_bend)
 
         '========= Calc qm2 [kg/s] =============
         ' ************** CHECK **************
