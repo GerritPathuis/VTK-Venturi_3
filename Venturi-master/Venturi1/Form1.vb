@@ -944,7 +944,7 @@ Public Class Form1
         '-------- calc Diameter and Radius-------------
         Bore = Bore * (1 + α_steel * (_T2 - _T1)) 'Calc termal expansion
         Radius = Bore * RD_ratio
-        _area_inlet = PI / 4 * (Bore / 1000)  '[[m2]
+        _area_inlet = PI / 4 * (Bore / 1000) ^ 2  '[[m2]
 
         ip = _p1_tap / 10 ^ 5           'Operating pressure [Pa]->[bar]
         dp = _Δp / 10 ^ 5               'dp on instrument [Pa]->[bar]
@@ -991,8 +991,8 @@ Public Class Form1
         TextBox57.Text = α_steel.ToString()
         TextBox60.Text = (dp * 10 ^ 3).ToString()           '[mbar]
         TextBox59.Text = (ip * 10 ^ 3).ToString()           '[mbar]
-        TextBox64.Text = (Radius * 10 ^ 3).ToString("0")    '[m]
-        TextBox72.Text = (Bore * 10 ^ 3).ToString("0")   '[m]
+        TextBox64.Text = Radius.ToString("0")               '[mm]
+        TextBox72.Text = Bore.ToString("0")                 '[mm]
         TextBox71.Text = _area_inlet.ToString("0.00")       '[m2] pipe area
         TextBox74.Text = qm1.ToString("0.00")               'flow [kg/s]
         TextBox69.Text = _Reynolds_bend.ToString("0")       '[Reynolds] 
