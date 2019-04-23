@@ -39,7 +39,7 @@ Public Class Form1
         Calc_rectangle_venturi()
     End Sub
     'Shell flow metering Handbook chapter 6.2.11 page 99, 238 and 239
-
+    'Units are [mm], [bar], [mPas], [kg/m3]
     Private Sub Calc_rectangle_venturi()
         Dim Inlet_W, Inlet_H, small_w, small_h As Double    'Dimensions
         Dim Inlet_sq As Double      'W/H ratio
@@ -914,6 +914,8 @@ Public Class Form1
         Calc_pipe_bend()
     End Sub
     'Shell flow metering Handbook chapter 8.1.11 page 118
+    '**** Calculation of Flow rate ******
+    'Units are [mm], [bar], [mPas], [kg/m3]
     'http://www.nivelco.com.ua/documents/technical%20publications%20docs/Instrument-Engineers-Handbook-Fourth-Edition-Volume-One-Process-Measurement-and-Analysis.pdf
     'page 190
     Private Sub Calc_pipe_bend()
@@ -933,8 +935,10 @@ Public Class Form1
         Dim qv2sec As Double        'inlet flow [m3/s]
         Dim qv2hour As Double       'inlet flow [m3/hour]
         Dim v_inlet As Double       'Inlet speed [m2]
+        Dim Q_dev As Double = 1     'Deviation initial value
 
         '-------- get data ------------
+        Get_data_from_screen()
         Bore = NumericUpDown22.Value        'Internal diameter [mm]
         RD_ratio = NumericUpDown20.Value
         α_steel = 1.3 * 10 ^ -5             '[/K] Thermal expansion coefficient steel
@@ -951,23 +955,25 @@ Public Class Form1
 
         '========= Calc qm1 [kg/s] =============
         qm1 = 2.46 * 10 ^ -5 * X_bend * Bore ^ 2 * Sqrt(dp * _ρ)
-        'qm1 = 2.46 * 10 ^ -5 * X_bend * Bore ^ 2 * Sqrt(2*dp * _ρ)
 
-        TextBox84.Text = dp.ToString
+        '========= now interate ============
+        Do While Q_dev > 0.0001
 
-        '=========== _Reynolds entrance ============
-        _Reynolds_bend = 1273200 * qm1 / (_dyn_visco * Bore)
+            '=========== _Reynolds entrance ============
+            _Reynolds_bend = 1273200 * qm1 / (_dyn_visco * Bore)
 
-        '=========== Calc C1  ============
-        Dim pp As Double = Sqrt(Radius / (2 * Bore))
+            '=========== Calc C1  ============
+            Dim pp As Double = Sqrt(Radius / (2 * Bore))
 
-        C1 = pp + 6.5 * pp / Sqrt(_Reynolds_bend)
+            C1 = pp + 6.5 * pp / Sqrt(_Reynolds_bend)
 
-        '========= Calc qm2 [kg/s] =============
-        ' ************** CHECK **************
-        qm2 = 2.46 * 10 ^ -5 * C1 * Bore ^ 2 * Sqrt(dp * _ρ)
-        ' qm2 = 2.46 * 10 ^ -5 * C1 * Bore ^ 2 * Sqrt(2* dp * _ρ)
+            '========= Calc qm2 [kg/s] =============
+            qm2 = 3.512407 * 10 ^ -5 * C1 * X_bend * Bore ^ 2 * Sqrt(dp * _ρ)
 
+            '========= calc the deviation ==========
+            Q_dev = Abs((qm1 - qm2) / qm1)
+            qm1 = (qm1 + qm2) / 2
+        Loop
         '============ speed inlet =============
         qv2sec = qm2 / _ρ
         qv2hour = qv2sec * 3600
