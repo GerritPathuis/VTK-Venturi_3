@@ -37,6 +37,7 @@ Public Class Form1
 
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click, NumericUpDown15.ValueChanged, NumericUpDown14.ValueChanged, NumericUpDown13.ValueChanged, NumericUpDown12.ValueChanged, NumericUpDown19.ValueChanged, TabPage7.Enter
         Calc_rectangle_venturi()
+        Draw_chart3()
     End Sub
     'Shell flow metering Handbook chapter 6.2.11 page 99, 238 and 239
     'Units are [mm], [bar], [mPas], [kg/m3]
@@ -161,7 +162,7 @@ Public Class Form1
         TextBox37.Text = area_throut.ToString("0")
         TextBox38.Text = α_steel.ToString
         TextBox39.Text = κ.ToString
-        TextBox41.Text = _Reynolds_shell.ToString("0")
+        TextBox41.Text = _Reynolds_shell.ToString("G2")
 
         TextBox43.Text = v_inlet.ToString("0.0")        '[m3/s]
         TextBox44.Text = Inlet_sq.ToString("0.0")       '[-]
@@ -336,7 +337,7 @@ Public Class Form1
 
             TextBox1.Text = Math.Round(_dia_keel * 1000, 0).ToString    '[mm] keel diameter
             TextBox2.Text = _C_classic.ToString
-            TextBox3.Text = _Reynolds_iso.ToString("0")                 '[-]
+            TextBox3.Text = _Reynolds_iso.ToString("G2")                '[-]
             TextBox4.Text = _v_inlet.ToString("0.0")                    '[m/s]
             TextBox5.Text = _ε_iso.ToString("0.000")                    '[-]
             TextBox13.Text = Math.Round(_p2_tap / 100, 1).ToString      '[Pa]->[mBar]
@@ -678,7 +679,7 @@ Public Class Form1
             Chart2.Series(0).ChartArea = "ChartArea0"
             Chart2.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Line
             Chart2.Titles.Add("Venturi flow computation acc. " & "ISO 5167-4:2003 Chapter 4")
-            Chart2.Titles.Add("Discharge Coefficient= " & _C_classic.ToString & ", Dia.throat= " & Round(_dia_keel * 1000, 1).ToString & " [mm]" & ", _ρ= " & _ρ.ToString & " [kg/m3]" & ", K= " & _κa.ToString & " [-]")
+            Chart2.Titles.Add("Discharge Coefficient= " & _C_classic.ToString & ", Dia.throat= " & Round(_dia_keel * 1000, 1).ToString & " [mm]" & ", ρ= " & _ρ.ToString & " [kg/m3]" & ", K= " & _κa.ToString & " [-]")
             Chart2.Titles(0).Font = New Font("Arial", 12, System.Drawing.FontStyle.Bold)
             Chart2.Series(0).Color = Color.Black
             Chart2.Series(0).IsVisibleInLegend = False
@@ -688,7 +689,7 @@ Public Class Form1
             Chart2.ChartAreas("ChartArea0").AxisX.MinorTickMark.Enabled = True
             Chart2.ChartAreas("ChartArea0").AxisY.MinorTickMark.Enabled = True
             Chart2.ChartAreas("ChartArea0").AxisY.Title = "Flow [kg/hr]"
-            Chart2.ChartAreas("ChartArea0").AxisX.Title = "dp_tap [Pa]"
+            Chart2.ChartAreas("ChartArea0").AxisX.Title = "Δp tap [mbar]"
 
             '----------------- data for the Chart -----------------
             '--------------- see ISO 5167-4 Equation 1-------------
@@ -696,7 +697,7 @@ Public Class Form1
                 y = _C_classic / Sqrt(1 - _β ^ 4)
                 y *= _ε_iso * PI / 4 * _dia_keel ^ 2 * Sqrt(2 * x * _ρ)
                 y *= 3600                               '[kg/h]
-                Chart2.Series(0).Points.AddXY(x, y)
+                Chart2.Series(0).Points.AddXY(x / 100, y)
             Next x
         Catch ex As Exception
             'MessageBox.Show(ex.Message &"Error 476")  ' Show the exception's message.
@@ -912,6 +913,7 @@ Public Class Form1
 
     Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click, NumericUpDown5.ValueChanged, NumericUpDown22.ValueChanged, NumericUpDown20.ValueChanged, TabPage8.Enter
         Calc_pipe_bend()
+        Draw_chart4()
     End Sub
     'Shell flow metering Handbook chapter 8.1.11 page 118
     '**** Calculation of Flow rate ******
@@ -935,14 +937,14 @@ Public Class Form1
         Dim qv2sec As Double        'inlet flow [m3/s]
         Dim qv2hour As Double       'inlet flow [m3/hour]
         Dim v_inlet As Double       'Inlet speed [m2]
-        Dim Q_dev As Double = 1     'Deviation initial value
+        Dim Q_dev As Double         'Deviation initial value
+        Dim pp As Double            'C1 calculation intermediate value
 
         '-------- get data ------------
         Get_data_from_screen()
         Bore = NumericUpDown22.Value        'Internal diameter [mm]
         RD_ratio = NumericUpDown20.Value
         α_steel = 1.3 * 10 ^ -5             '[/K] Thermal expansion coefficient steel
-
         X_bend = NumericUpDown5.Value       'Normal flow scale 0-10
 
         '-------- calc Diameter and Radius-------------
@@ -957,14 +959,14 @@ Public Class Form1
         qm1 = 2.46 * 10 ^ -5 * X_bend * Bore ^ 2 * Sqrt(dp * _ρ)
 
         '========= now interate ============
+        Q_dev = 1                       'Initiale value 
         Do While Q_dev > 0.0001
 
             '=========== _Reynolds entrance ============
             _Reynolds_bend = 1273200 * qm1 / (_dyn_visco * Bore)
 
             '=========== Calc C1  ============
-            Dim pp As Double = Sqrt(Radius / (2 * Bore))
-
+            pp = Sqrt(Radius / (2 * Bore))
             C1 = pp + 6.5 * pp / Sqrt(_Reynolds_bend)
 
             '========= Calc qm2 [kg/s] =============
@@ -974,18 +976,18 @@ Public Class Form1
             Q_dev = Abs((qm1 - qm2) / qm1)
             qm1 = (qm1 + qm2) / 2
         Loop
+
         '============ speed inlet =============
         qv2sec = qm2 / _ρ
         qv2hour = qv2sec * 3600
         v_inlet = qv2sec / _area_inlet
 
         '============ Check Reynolds =============
-        If _Reynolds_shell < 1.0 * 10 ^ 4 Then
+        If _Reynolds_shell < 10000 Then
             TextBox69.BackColor = Color.Red
         Else
             TextBox69.BackColor = Color.LightGreen
         End If
-
 
         '=========== present ==========
         TextBox90.Text = _flow_kghr.ToString("0")           'Requested mass flow inlet[kg/m3] 
@@ -1001,7 +1003,8 @@ Public Class Form1
         TextBox72.Text = Bore.ToString("0")                 '[mm]
         TextBox71.Text = _area_inlet.ToString("0.00")       '[m2] pipe area
         TextBox74.Text = qm1.ToString("0.00")               'flow [kg/s]
-        TextBox69.Text = _Reynolds_bend.ToString("0")       '[Reynolds] 
+
+        TextBox69.Text = _Reynolds_bend.ToString("G2")      '[Reynolds] 
         TextBox73.Text = C1.ToString("0.000")               '[-] 
         TextBox70.Text = ε_bend.ToString("0.0")             '[-] 
 
@@ -1013,4 +1016,95 @@ Public Class Form1
 
     End Sub
 
+    Private Sub Draw_chart3()
+        '===== Rectangle Shell venturi ======
+        Dim x, y As Double
+        Try
+            Chart3.Series.Clear()
+            Chart3.ChartAreas.Clear()
+            Chart3.Titles.Clear()
+            Chart3.Series.Add("Series0")
+            Chart3.ChartAreas.Add("ChartArea0")
+            Chart3.Series(0).ChartArea = "ChartArea0"
+            Chart3.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Line
+            Chart3.Titles.Add("Rectangle Shell Venturi flow" & vbCrLf & "Shell metering handbook page 99")
+            Chart3.Titles.Add("Discharge Coefficient= " & _C_classic.ToString & ", Dia.throat= " & Round(_dia_keel * 1000, 1).ToString & " [mm]" & ", ρ= " & _ρ.ToString & " [kg/m3]" & ", K= " & _κa.ToString & " [-]")
+            Chart3.Titles(0).Font = New Font("Arial", 12, System.Drawing.FontStyle.Bold)
+            Chart3.Series(0).Color = Color.Black
+            Chart3.Series(0).IsVisibleInLegend = False
+            Chart3.ChartAreas("ChartArea0").AxisX.Minimum = 0
+            Chart3.ChartAreas("ChartArea0").AxisX.MinorGrid.Enabled = True
+            Chart3.ChartAreas("ChartArea0").AxisY.MinorGrid.Enabled = True
+            Chart3.ChartAreas("ChartArea0").AxisX.MinorTickMark.Enabled = True
+            Chart3.ChartAreas("ChartArea0").AxisY.MinorTickMark.Enabled = True
+            Chart3.ChartAreas("ChartArea0").AxisY.Title = "Flow [kg/hr]"
+            Chart3.ChartAreas("ChartArea0").AxisX.Title = "Δp tap [mBar]"
+
+            '----------------- data for the Chart -----------------
+            '--------------- see ISO 5167-4 Equation 1-------------
+            For x = 0 To _Δp Step 1
+                y = _C_classic / Sqrt(1 - _β ^ 4)
+                y *= _ε_iso * PI / 4 * _dia_keel ^ 2 * Sqrt(2 * x * _ρ)
+                y *= 3600                               '[kg/h]
+                Chart3.Series(0).Points.AddXY(x / 100, y)
+            Next x
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & "Error 1051")  ' Show the exception's message.
+        End Try
+    End Sub
+    Private Sub Draw_chart4()
+        '===== Shell Pipe bend flow metering =====
+        Dim x As Double
+        Dim Q_dev As Double
+        Dim dp, qm1, qm2, bore, _Reyn_bend, X_bend, Radius As Double
+        Dim pp, C1 As Double
+
+        Double.TryParse(TextBox64.Text, Radius)
+        Double.TryParse(TextBox72.Text, bore)
+        X_bend = NumericUpDown5.Value
+
+        Try
+            Chart4.Series.Clear()
+            Chart4.ChartAreas.Clear()
+            Chart4.Titles.Clear()
+            Chart4.Series.Add("Series0")
+            Chart4.ChartAreas.Add("ChartArea0")
+            Chart4.Series(0).ChartArea = "ChartArea0"
+            Chart4.Series(0).ChartType = DataVisualization.Charting.SeriesChartType.Line
+            Chart4.Titles.Add("Pipe bend flow metering" & vbCrLf & "Shell metering handbook page 117")
+            Chart4.Titles.Add("Bore Diameter= " & bore.ToString("0") & " [mm]" & ", ρ= " & _ρ.ToString & " [kg/m3]" & ", K= " & _κa.ToString & " [-]")
+            Chart4.Titles(0).Font = New Font("Arial", 12, System.Drawing.FontStyle.Bold)
+            Chart4.Series(0).Color = Color.Black
+            Chart4.Series(0).IsVisibleInLegend = False
+            Chart4.ChartAreas("ChartArea0").AxisX.Minimum = 0
+            Chart4.ChartAreas("ChartArea0").AxisX.MinorGrid.Enabled = True
+            Chart4.ChartAreas("ChartArea0").AxisY.MinorGrid.Enabled = True
+            Chart4.ChartAreas("ChartArea0").AxisX.MinorTickMark.Enabled = True
+            Chart4.ChartAreas("ChartArea0").AxisY.MinorTickMark.Enabled = True
+            Chart4.ChartAreas("ChartArea0").AxisY.Title = "Flow [kg/hr]"
+            Chart4.ChartAreas("ChartArea0").AxisX.Title = "Δp tap [mBar]"
+
+            '----------------- data for the Chart -----------------
+            '------- see Shell metering handbook page 117-------------
+            For x = 0 To 100 Step 1
+                dp = _Δp / 10 ^ 5 * (x / 100)             'dp on instrument [Pa]->[bar]
+                qm1 = 2.46 * 10 ^ -5 * X_bend * bore ^ 2 * Sqrt(dp * _ρ)
+
+                '========= now interate ============
+                Q_dev = 1
+                Do While Q_dev > 0.0001
+                    _Reyn_bend = 1273200 * qm1 / (_dyn_visco * bore)
+                    pp = Sqrt(Radius / (2 * bore))
+                    C1 = pp + 6.5 * pp / Sqrt(_Reyn_bend)
+                    qm2 = 3.512407 * 10 ^ -5 * C1 * X_bend * bore ^ 2 * Sqrt(dp * _ρ) '[kg/s]
+                    Q_dev = Abs((qm1 - qm2) / qm1) 'the deviation ==========
+                    qm1 = (qm1 + qm2) / 2
+                Loop
+
+                Chart4.Series(0).Points.AddXY(dp * 1000, qm2 * 3600)
+            Next x
+        Catch ex As Exception
+            MessageBox.Show(ex.Message & "Error 10487")  ' Show the exception's message.
+        End Try
+    End Sub
 End Class
