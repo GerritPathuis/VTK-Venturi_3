@@ -27,7 +27,7 @@ Public Class Form1
     Dim _qm As Double                       'Mass flowrate [kg/s]
     Dim _T1 As Double                       'Reference temperature
     Dim _T2 As Double                       'Line temperature (actual)
-    Dim α_steel As Double = 1.3 * 10 ^ -5   '[/K] steel expanion
+    Dim _α_steel As Double = 1.3 * 10 ^ -5   '[/K] steel expanion coeff
     Dim A2a, A2b, a2c As Double
 
     '----------- directory's-----------
@@ -49,7 +49,6 @@ Public Class Form1
         Dim β As Double             'Diameter ratio
         Dim DeIn As Double          'Diameter inlet
         Dim DeT As Double           'Diameter throught
-        Dim α_steel As Double       'Expansion coefficient
 
         Dim qm As Double            'Mass flow [kg/s]
         Dim qv As Double            'Mass flow [m3/s]
@@ -87,10 +86,10 @@ Public Class Form1
         m = (small_w * small_h) / (Inlet_W * Inlet_H)
 
         '============= Calc inlet diameter ============
-        DeIn = 1.1284 * Sqrt(Inlet_W * Inlet_H) * (1 + α_steel * (_T2 - _T1))
+        DeIn = 1.1284 * Sqrt(Inlet_W * Inlet_H) * (1 + _α_steel * (_T2 - _T1))
 
         '============= Calc throat diameter ============
-        DeT = 1.1284 * Sqrt(small_w * small_h) * (1 + α_steel * (_T2 - _T1))
+        DeT = 1.1284 * Sqrt(small_w * small_h) * (1 + _α_steel * (_T2 - _T1))
 
 
         '=============   venturi dimensional β ratio  ============
@@ -160,7 +159,7 @@ Public Class Form1
         TextBox35.Text = ip.ToString("0.000")           '[bar]
         TextBox36.Text = (_dyn_visco * 10 ^ 6).ToString("0.0")  'Viscosity
         TextBox37.Text = area_throut.ToString("0")
-        TextBox38.Text = α_steel.ToString
+        TextBox38.Text = _α_steel.ToString
         TextBox39.Text = κ.ToString
         TextBox41.Text = _Reynolds_shell.ToString("G2")
 
@@ -311,7 +310,6 @@ Public Class Form1
         _Reynolds_iso = Reynolds(_v_inlet, _dia_in, _ρ, _dyn_visco)
 
 
-
         '------- ISO5167-1:2003, SECTION 5.2 page 8-------------
         A2b = _C_classic * _ε_iso * _βa ^ 2 / Math.Sqrt(1 - _βa ^ 4)
         A2a = 4 * _flow_kgsec / (PI * _dia_in ^ 2 * Math.Sqrt(2 * _Δp * _ρ))
@@ -320,7 +318,7 @@ Public Class Form1
         Return (a2c)
     End Function
     Private Function Reynolds(v As Double, d As Double, ρ As Double, visco As Double) As Double
-        Return (v * d * ρ / _dyn_visco)
+        Return (v * d * ρ / visco)
     End Function
 
     Private Sub Present_results_iso()
@@ -925,7 +923,6 @@ Public Class Form1
         Dim RD_ratio As Double
         Dim Radius As Double
         Dim ε_bend As Double = 1    'fluids expansivity
-        Dim α_steel As Double       'Expansion coefficient
         Dim qm1, qm2 As Double      'Mass flow [kg/s]
         Dim X_bend As Double        'Normal flow scale 0-10
         Dim ip As Double            'inlet press in [bar]
@@ -944,11 +941,10 @@ Public Class Form1
         Get_data_from_screen()
         Bore = NumericUpDown22.Value        'Internal diameter [mm]
         RD_ratio = NumericUpDown20.Value
-        α_steel = 1.3 * 10 ^ -5             '[/K] Thermal expansion coefficient steel
         X_bend = NumericUpDown5.Value       'Normal flow scale 0-10
 
         '-------- calc Diameter and Radius-------------
-        Bore = Bore * (1 + α_steel * (_T2 - _T1)) 'Calc termal expansion
+        Bore = Bore * (1 + _α_steel * (_T2 - _T1)) 'Calc termal expansion
         Radius = Bore * RD_ratio
         _area_inlet = PI / 4 * (Bore / 1000) ^ 2  '[[m2]
 
@@ -996,7 +992,7 @@ Public Class Form1
         TextBox56.Text = _κa.ToString("0.00")
         TextBox66.Text = _T1.ToString("0")                  '[c]
         TextBox75.Text = _T2.ToString("0")                  '[c]
-        TextBox57.Text = α_steel.ToString()
+        TextBox57.Text = _α_steel.ToString()
         TextBox60.Text = (dp * 10 ^ 3).ToString()           '[mbar]
         TextBox59.Text = (ip * 10 ^ 3).ToString()           '[mbar]
         TextBox64.Text = Radius.ToString("0")               '[mm]

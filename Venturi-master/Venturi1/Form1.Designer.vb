@@ -3486,7 +3486,7 @@ Partial Class Form1
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.IsMdiContainer = True
         Me.Name = "Form1"
-        Me.Text = "Venturi 17-04-2019"
+        Me.Text = "Venturi 29-04-2019"
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage9.ResumeLayout(False)
         Me.GroupBox12.ResumeLayout(False)
