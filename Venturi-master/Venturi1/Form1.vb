@@ -197,6 +197,7 @@ Public Class Form1
         _dyn_visco = Calc_dyn_vis(20)
 
         '========== dp range instrument [mbar] =============
+        ComboBox1.Items.Add("    10")
         ComboBox1.Items.Add("    12,5")
         ComboBox1.Items.Add("    20")
         ComboBox1.Items.Add("    25")
